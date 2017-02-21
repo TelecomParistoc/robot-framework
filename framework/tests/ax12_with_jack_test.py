@@ -3,8 +3,8 @@ from ..robot.starting_block import add_jack_and_delay, Wait_Object
 from ..local_robot.big_robot import *
 from I2C_bus import I2C_bus
 from AX12 import AX12
+import gpio 
 import random
-import gpio
 import time
 
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         exit()
 
     scanned = I2C_bus.scan(print_ax12_id_on_the_fly)
-    #scanned = [129, 145]
+    #scanned = [130, 161]
     if len(scanned)<2:
         print "[-] Not enough AX12 on I2C bus to achieve the sequence, exiting"
         exit()

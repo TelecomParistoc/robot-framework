@@ -2,6 +2,7 @@ from ..local_robot.big_robot import *
 from threading import Thread
 import time
 
+from sys import argv
 
 if __name__ == "__main__":
 
@@ -18,7 +19,9 @@ if __name__ == "__main__":
     def ax12_up():
         print "[!!!] Moving ax12 test"
 
+
     robot = init()
+	
     robot.AX12_pinces1.move_to((100, 20))                          #no callback => impossible to wait the end of the action
     robot.AX12_pinces2.move_to((200, 10), robot.create_callback()) #callback specified => now robot is able to wait for the end of a number of actions we specify
     robot.wait(10, 1)                                              #robot waits for 1 callback during a maximum delay of 10s
