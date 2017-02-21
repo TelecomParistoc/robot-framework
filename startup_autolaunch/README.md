@@ -35,4 +35,4 @@ Exécuter un make pour construire robot_loop_starter
 
 Créer un fichier de configuration contenant 3 lignes : le nom du programme, la commande shell d'initialisation (pull-up/down par exemple), et la commande shell pour obtenir l'état du bouton
 
-Exécuter ./setup.sh robot_loop_starter [chemin vers votre fichier de configuration] [chemin vers l'emplacement utilisé pour savoir quel programme lancer] [chemin vers l'emplacement utilisé pour savoir quelles commandes exécuter]
+Exécuter ./setup.sh robot_loop_starter launch.py [chemin vers votre fichier de configuration] [chemin vers l'emplacement utilisé pour savoir quel programme lancer] [chemin vers l'emplacement utilisé pour savoir quelles commandes exécuter]

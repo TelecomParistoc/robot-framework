@@ -1,5 +1,3 @@
-//TODO : compile it, check it
-
 // Main program used at startup that launch progam we indicate in config file
 #include <sys/wait.h>
 #include <stdlib.h>
@@ -23,8 +21,8 @@ int main(int argc, char* argv[])
     std::string initialization;
     std::string command;
     std::ifstream ifs(argv[2], std::ios::in);
-    ifs>>initialization;
-    ifs>>command;
+    std::getline(ifs, initialization);
+    std::getline(ifs, command);
 
     system(initialization.c_str());
 
