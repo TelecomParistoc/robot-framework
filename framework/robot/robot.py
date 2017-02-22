@@ -4,8 +4,16 @@ import time
 
 
 class Robot:
+    """
+	represents a robot on which we can add objects (like AX12 motors for example)
+	or specify sequences of actions
+    """
 
     def __init__(self, debug=True):
+	"""
+	    Constructs a new Robot object, and launch the sequence thread
+	"""
+
         self.debug = debug
         self.received_callbacks = 0
 

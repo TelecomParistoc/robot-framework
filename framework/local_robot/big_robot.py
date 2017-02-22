@@ -1,7 +1,9 @@
-from ..robot.robot import Robot
+from robot import Robot		#robot is an installed package
 
 #from utils import AX12, moving_interface  #This part is temporary : AX12 and Moving_Interface will be packages in a near future
-from utils import moving_interface 	#This line is temporary
+
+#this file should import moving_interface, but moving_interface is not yet implemented !!
+#from utils import moving_interface 	#This line is temporary
 from AX12 import AX12			#This part isn't
 
 
