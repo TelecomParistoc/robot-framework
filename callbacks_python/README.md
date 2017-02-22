@@ -1,10 +1,19 @@
 # Callback python
 
-Ce dossier écrêmé présente uniquement un test (en plus du code important) qui montre comment interfacer des callbacks python appelés dans des contexte d'exécution (threads C) différents.
+Ce dossier contient du code permettant d'encapsuler des fonctions python pour pouvoir utiliser des fonctions python comme callbacks de fonctions C.
+Ce genre d'encapsulation est nécessaire pour s'assurer que le garbage collector de python ne libère pas la mémoire allouée pour une fonction qui va ensuite être appelée par du code C. Ce code garde en fait juste une référence "au chaud" de chaque fonction encapsulée, pour que le garbage collector ne les désalloue pas.
 
-Pour tester : *make test*
+Le code effectif est contenu dans encapsulate_callback.py, timer_callbacks_test.cpp et timer_callbacks_test.py sont un test.
 
-Pour installer : *sudo make install*
+Il est nécessaire d'installer cette bibliothèque ; l'installation consiste simplement à copier le fichier encapsulate_callback.py au bon endroit.
 
-**Important !**
-On notera la présence du module encapsulate_callback dont l'utilisation est nécessaire pour encapsuler des callback python dans un objet permettant de les utiliser en C.
+
+## Pour tester
+```
+$ make test
+```
+
+## Pour installer
+```
+$ sudo make install
+```
