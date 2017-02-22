@@ -412,7 +412,9 @@ class Robot:
 
                 #print(self.cur_sequence, self.cur_parallel, self.sequences[self.cur_sequence], self.delays[self.cur_sequence], self.expected_callbacks[self.cur_sequence], self.sequence_queue)
                 if self.cur_sequence == "" and len(self.sequences[""]) <= 1 and len(self.sequences[""][0]) == 0:
-                    print("[...] No action in root sequence, doing nothing")
+                    # non au spam de la console !!!
+		    #print("[...] No action in root sequence, doing nothing")
+		    pass
                 else:
                     deltime = time.time()-prev_time
                     #print self.cur_sequence, self.cur_parallel, len(self.delays), len(self.delays[self.cur_sequence]), self.received_callbacks, self.expected_callbacks[self.cur_sequence]
