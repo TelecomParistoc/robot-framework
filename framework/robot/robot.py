@@ -135,8 +135,16 @@ class Robot:
         return True
 
 
+    def add_parallel(self, function, arg_list, count_enable=True, force_root_seq=True):
+	if count_enable:
+	    return self.private_add_parallel((lambda u: function(*(arg_list + [u])), True),
+					force_root_seq=force_root_seq)
+	else:
+	    return self.private_add_parallel((lambda u: function(*arg_list), False),
+					force_root_seq=force_root_seq)
 
-    def add_parallel(self, to_call_and_is_callback, force_root_seq=True):
+
+    def private_add_parallel(self, to_call_and_is_callback, force_root_seq=True):
         self.sequence_mutex.acquire()
 
         if self.cur_sequence_constructed != "":
