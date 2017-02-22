@@ -58,8 +58,8 @@ if __name__ == "__main__":
         print "[-] Unable to start I2C communication ("+str(e)+"), exiting"
         exit()
 
-    scanned = I2C_bus.scan(print_ax12_id_on_the_fly)
-    #scanned = [130, 161]
+    #scanned = I2C_bus.scan(print_ax12_id_on_the_fly)
+    scanned = [130, 141]
     if len(scanned)<2:
         print "[-] Not enough AX12 on I2C bus to achieve the sequence, exiting"
         exit()
