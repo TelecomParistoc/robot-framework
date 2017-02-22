@@ -136,6 +136,10 @@ class Robot:
 
 
     def add_parallel(self, function, arg_list, count_enable=True, force_root_seq=True):
+	
+	if not (isinstance(arg_list, tuple) or isinstance(arg_list, list)):
+	    raise(TypeError("parameter arg_list must be a list or a tuple"))
+
 	if count_enable:
 	    return self.private_add_parallel((lambda u: function(*(arg_list + [u])), True),
 					force_root_seq=force_root_seq)
