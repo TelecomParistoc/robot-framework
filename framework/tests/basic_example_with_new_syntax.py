@@ -9,8 +9,8 @@ from AX12 import AX12
 r = Robot()
 
 #adds motors to the robot skeleton
-r.add_object(AX12(141), "motor_1")
-r.add_object(AX12(130), "motor_2")
+r.add_object(AX12(130), "motor_1")
+r.add_object(AX12(121), "motor_2")
 
 
 # -------------------------   SEQUENCE DEFINITION ----------------------------#
@@ -30,9 +30,10 @@ r.wait(max_delay=3, n_callbacks=2)
 
 
 #second block of actions; this block will be run AFTER the first one
-r.add_parallel(r.motor_1.move, [0])
-r.add_parallel(r.motor_2.move, [0])
-r.wait()
+#r.add_parallel(r.motor_1.turn, [100], False)
+r.wait(max_delay=5)
+
+#r.add_parallel(r.motor_2.turn, [0], False)
 
 #you MUST specify where the definition of the sequence ends
 # so the following line means "end of seq_1 definition"
