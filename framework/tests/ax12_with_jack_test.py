@@ -83,7 +83,7 @@ if __name__ == "__main__":
     robot.AX12_second.set_torque(400)
     robot.AX12_second.set_speed(100)
 
-    manage_jack = add_jack_and_delay(robot, 100, False)
+    manage_jack = add_jack_and_delay(robot, 10, False)
 
     gpio.assign_callback_on_gpio_down(24, lambda: manage_jack(False))
     gpio.assign_callback_on_gpio_up(24, lambda: manage_jack(True))
@@ -109,8 +109,10 @@ if __name__ == "__main__":
 
     wait_end = Wait_Object()
     wait_end.join()
-
+    
+    print "kikoo"
     robot.stop()
+    print "okok"
     gpio.join()
     print "ahahah"
     Thread_Easy_Stop.stop_all_threads()
