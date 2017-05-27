@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
         system((command+" > /tmp/robot_state").c_str());
         std::ifstream ifs("/tmp/gpio_state", std::ios::in);
         ifs>>current_state;
+        ifs.close();
         remove("/tmp/gpio_state");
 
 	std::cout<<"Read "<<current_state<<" state"<<std::endl;

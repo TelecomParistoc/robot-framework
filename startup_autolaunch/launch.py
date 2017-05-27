@@ -21,6 +21,7 @@ command_path = content[1].split('\n')[0]
 program_path = content[2].split('\n')[0]
 
 print sys.argv
+print program_path.split('/')[-1]
 if "start" in sys.argv[1]:
     print("Starting robot main program")
     os.system(program_path+" "+program_to_launch_path+" "+command_path+" > "+logfile)
