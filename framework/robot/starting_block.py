@@ -1,6 +1,7 @@
 from thread_easy_stop import Thread_Easy_Stop
 import time
 
+from sys import stdout
 
 def time_elapsed(delay, callback):
     def run_step(t):
@@ -55,7 +56,7 @@ class Wait_Object:
 class ManageJack:
 
     def start(self):
-        print "[++++] Actionning robot"
+        print "[++++] Jack pulled! Actionning robot"
         self.robot.start()
 
     def abort(self):
@@ -83,6 +84,10 @@ class ManageJack:
 
         if key in self.transitions[self.cur_state]:
             self.cur_state, callback = self.transitions[self.cur_state][key]
+
+            if self.cur_state == "ready":
+                print "[+] Jack inserted; waiting for the jack to be pulled"
+
             if callback is not None:
                 callback()
 
@@ -96,7 +101,11 @@ def add_jack_and_delay(robot, delay, start_waiting_jack = True):
     robot.add_method(lambda self: wait_object.stop(), 'start')
 
     robot.add_sequence('loop_before_start')
-    robot.add_parallel((lambda u: wait_object.set_callback(callback=u), True))
+    #instead of
+    #robot.add_parallel((lambda u: wait_object.set_callback(callback=u), True))
+    #with the new syntax we write now
+    robot.add_parallel(wait_object.set_callback, [])
+    robot.add_parallel(stdout.write, ["[.] Waiting for jack to be inserted...\n"], False)
     robot.wait()
     robot.sequence_done()
 
