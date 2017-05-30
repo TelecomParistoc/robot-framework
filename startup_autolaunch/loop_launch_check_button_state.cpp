@@ -31,7 +31,8 @@ int main(int argc, char* argv[])
     int current_state = 0;
     while(true)
     {
-        system((command+" > /tmp/robot_state").c_str());
+	std::cout<<"Executing "<<command<<std::endl;
+        system((command+" > /tmp/gpio_state").c_str());
         std::ifstream ifs("/tmp/gpio_state", std::ios::in);
         ifs>>current_state;
         ifs.close();
