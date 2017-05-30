@@ -52,7 +52,7 @@ class Wait_Object:
             self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t))
             self.thread.start()
 
-class manage_jack:
+class ManageJack:
 
     def start(self):
         print "[++++] Actionning robot"
@@ -88,7 +88,7 @@ class manage_jack:
 
 
 def add_jack_and_delay(robot, delay, start_waiting_jack = True):
-    robot.add_object(manage_jack(robot), 'jack')
+    robot.add_object(ManageJack(robot), 'jack')
 
     time_elapsed(delay, lambda: manage_time_elapsed(robot))
 
