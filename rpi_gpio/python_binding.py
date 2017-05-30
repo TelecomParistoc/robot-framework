@@ -6,6 +6,7 @@ from encapsulate_callback import encapsulate_callback
 
 lib_gpio = ctypes.cdll.LoadLibrary(LIBNAME)
 
+lib_gpio.wpi_to_gpio.restype = ctypes.c_int
 
 INPUT = 0
 OUTPUT = 1
