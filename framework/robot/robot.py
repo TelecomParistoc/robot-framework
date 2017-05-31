@@ -1,6 +1,7 @@
 from threading import Thread, Lock
 import types
 import time
+import math
 
 import motion
 import motordriver
@@ -31,7 +32,6 @@ class Robot:
         self.expected_callbacks = {'':[0]}
         self.sequence_queue = []
         self.sequence_mutex = Lock()
-        self.color = None
 
         self.expected_callback_indexes = []
         self.current_callback_index = 0
@@ -134,19 +134,42 @@ class Robot:
             self.wait(max_delay=max_delay)
 
 
-    def start_collision_detection(self, front_detection, rear_detection, delay=0.05):
+    def start_collision_detection(self, front_detection, rear_detection,
+                                    delay=0.05, no_sensor_distance=100,
+                                    table_dimensions=(3000, 2000),
+                                    heading_in_y_direction=0):
         """
             front_detection and rear_detection must be 2 functions without
             parameters, which respectively return True if and only if there is
             an obstacle in the forward (backward) direction
+
             delay is the delay in seconds between two calls to these functions
+
+            when the robot is close from edges, sensors are disabled
+            if distance from edge <= no_sensor_distance, then sensors are disabled
+
+            heading_in_y_direction is the heading to have to go in the direction +y
+
             How to react when a collison is detected is not yet very well defined...
         """
         self.enable_collision_detection = True
 
         def sensor_manager():
+
             while self.enable_collision_detection:
 
+                x = self.get_pos_X()
+                y = self.get_pos_Y()
+
+                theta = self.get_heading()
+                tmp = (theta - heading_in_y_direction) * math.pi / 180.
+
+                dx = no_sensor_distance * math.sin(tmp)
+                dy = no_sensor_distance * math.cos(tmp)
+                #TODO à finir ! 
+
+
+                #if the robot is close from an edge, the sensors are ignored
                 if front_detection():
                     print "[!] obstacle detected forwards!"
                     #TODO react !!!
@@ -155,7 +178,7 @@ class Robot:
                     print "[!] obstacle detected backwards!"
                     #TODO react !!
 
-                sleep(delay)
+                time.sleep(delay)
 
         self.collision_thread = Thread(target=sensor_manager, args=[])
         self.collision_thread.start()
