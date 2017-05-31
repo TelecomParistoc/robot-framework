@@ -37,6 +37,17 @@ class Robot:
 
         if moving_interface:
             self.moving_interface = True
+            self.actual_path = None
+
+            #variables for moveTo
+            self.x_dest = None
+            self.y_dest = None
+            self.final_heading = None
+            self.moveTo_callback = None
+
+            #variables for move
+            self.goal_dist = None
+            self.move_callback = None
             self.load_moving_interface()
         else:
             self.moving_interface = False
@@ -45,26 +56,69 @@ class Robot:
         self.thread = Thread(target=lambda: self.run()).start()
 
 
-
     def load_moving_interface(self):
         """
             loads functions from motion.py and motordriver.py
             so we can write for instance robot.moveTo(...)
             It must be called by __init__
         """
+        if not self.moving_interface:
+            print "[-] Error: moving_interface is set to False; No functions are loaded"
+            return
+
         for module in [motion, motordriver]:
             for module_attribute in dir(module):
                 attr = getattr(module, module_attribute)
                 if callable(attr):
+
+                    #these functions are already overriden, see below
+                    if attr.__name__ in ["moveTo", "turn", "move"]:
+                        continue
+
                     #warning: functions in motion or motordriver does not
                     #take robot in first argument
                     #but when we write robot.function(foo), function gets
                     #actually 2 arguments: robot and foo
                     #so here we have to remove the first argument
                     #a more precise adaptation should be done
-                    print attr, attr.__name__
                     self.add_method((lambda attr_copy: (lambda *args: attr_copy(*args[1:])))(attr),
                                     name=attr.__name__)
+
+    def moveTo(self, x_dest, y_dest, final_heading=-1, callback=None):
+        """
+            this function does the same thing as motion.moveTo, but saves the
+            command sent to MotorController. It's usefull to resume the command
+            after an emergency stop
+        """
+        if not self.moving_interface:
+            print "[-] Error in Robot.moveTo; moving_interface is not enable"
+            return
+
+        self.moveTo_callback = callback
+        self.x_dest = x_dest
+        self.y_dest = y_dest
+        self.final_heading  = final_heading
+        motion.moveTo(x_dest, y_dest, final_heading, private_moveTo_callback)
+
+    def private_moveTo_callback(self):
+        self.x_dest = None
+        self.y_dest = None
+        self.final_heading = None
+        if callable(self.moveTo_callback): self.moveTo_callback()
+
+    def move(self, goal_dist, callback=None):
+        """
+            same thing as moveTo
+        """
+        self.goal_dist = goal_dist
+        self.move_callback = callback
+        motion.move(goal_dist, self.private_move_callback)
+
+    def private_move_callback(self):
+        self.goal_dist = None
+        self.move_callback = None
+        if callable(self.move_callback): self.move_callback()
+
 
     def add_path_to_follow(self, path, max_delay=15):
         """
@@ -77,6 +131,38 @@ class Robot:
         for x, y in path:
             self.add_parallel(self.moveTo, [x, y, -1])
             self.wait(max_delay=max_delay)
+
+
+    def start_collision_detection(self, front_detection, rear_detection, delay=0.05):
+        """
+            front_detection and rear_detection must be 2 functions without
+            parameters, which respectively return True if and only if there is
+            an obstacle in the forward (backward) direction
+            delay is the delay in seconds between two calls to these functions
+            How to react when a collison is detected is not yet very well defined...
+        """
+        self.enable_collision_detection = True
+
+        def sensor_manager():
+            while self.enable_collision_detection:
+
+                if front_detection():
+                    print "[!] obstacle detected forwards!"
+                    #TODO react !!!
+
+                if rear_detection():
+                    print "[!] obstacle detected backwards!"
+                    #TODO react !!
+
+                sleep(delay)
+
+        self.collision_thread = Thread(target=sensor_manager, args=[])
+        self.collision_thread.start()
+
+
+    def stop_collision_sensors(self):
+        self.enable_collision_detection = False
+        print "[+] Stopping collision detection"
 
 
     def add_method(self, func, name=None):
@@ -555,6 +641,7 @@ class Robot:
 
     def stop(self):
         self.started = False
+        self.stop_collision_sensors()
         if self.debug:
             print("[++][...] Stopping sequence thread")
 
