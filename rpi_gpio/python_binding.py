@@ -59,7 +59,6 @@ def set_pull_up_down(id, mode):
 
 def digital_read(id):
     assert (isinstance(id, int))
-    print "Reading PIN ", id, "; got the result ", int(lib_gpio.pin_state(ctypes.c_int(id)))
     return int(lib_gpio.pin_state(ctypes.c_int(id)))
 
 def digital_write(id, val):

@@ -52,7 +52,7 @@ class Wait_Object:
             self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t))
             self.thread.start()
 
-class manage_jack:
+class ManageJack:
 
     def start(self):
         print "[++++] Actionning robot"
@@ -74,8 +74,10 @@ class manage_jack:
     def manage_event(self, pulled):
         if pulled:
             key = 'pull'
+            print "[+] Jack inserted! Waiting for the jack to be pulled"
         else:
             key = 'push'
+            print "[-] Jack pulled!"
 
         if self.cur_state not in self.transitions:
             print "[-] Inexisting transition for state "+self.cur_state
@@ -88,7 +90,7 @@ class manage_jack:
 
 
 def add_jack_and_delay(robot, delay, start_waiting_jack = True):
-    robot.add_object(manage_jack(robot), 'jack')
+    robot.add_object(ManageJack(robot), 'jack')
 
     time_elapsed(delay, lambda: manage_time_elapsed(robot))
 
@@ -96,7 +98,7 @@ def add_jack_and_delay(robot, delay, start_waiting_jack = True):
     robot.add_method(lambda self: wait_object.stop(), 'start')
 
     robot.add_sequence('loop_before_start')
-    robot.add_parallel((lambda u: wait_object.set_callback(callback=u), True))
+    robot.add_parallel(wait_object.set_callback, [])
     robot.wait()
     robot.sequence_done()
 
