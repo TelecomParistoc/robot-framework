@@ -3,6 +3,7 @@ import types
 import time
 
 import motion
+import motordriver
 
 class Robot:
     """
@@ -35,9 +36,19 @@ class Robot:
         self.current_callback_index = 0
 
         if moving_interface:
-            for motion_attribute in dir(motion):
-                if callable(motion_attribute):
-                    self.add_method(getattr(motion, motion_attribute))
+            for module in [motion, motordriver]:
+                for module_attribute in dir(module):
+                    attr = getattr(module, module_attribute)
+                    if callable(attr):
+                        #warning: functions in motion or motordriver does not
+                        #take robot in first argument
+                        #but when we write robot.function(foo), function gets
+                        #actually 2 arguments: robot and foo
+                        #so here we have to remove the first argument
+                        #a more precise adaptation should be done
+                        print attr, attr.__name__
+                        self.add_method((lambda attr_copy: (lambda *args: attr_copy(*args[1:])))(attr),
+                                        name=attr.__name__)
 
         self.started = False
         self.thread = Thread(target=lambda: self.run()).start()
@@ -144,8 +155,9 @@ class Robot:
         """
             same as add_parallel but function is launched in a separated Thread
         """
+
         self.add_parallel(
-            lambda: Thread(target=function, args=arg_list).start(), [],
+            lambda *args: Thread(target=function, args=args).start(), arg_list,
             count_enable=count_enable, force_root_seq=force_root_seq)
 
     def add_parallel(self, function, arg_list, count_enable=True, force_root_seq=False):
