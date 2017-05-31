@@ -100,7 +100,7 @@ def add_jack_and_delay(robot, delay, start_waiting_jack = True):
     robot.add_method(lambda self: wait_object.stop(), 'start')
 
     robot.add_sequence('loop_before_start')
-    
+
     #instead of
     #robot.add_parallel((lambda u: wait_object.set_callback(callback=u), True))
     #with the new syntax we write now

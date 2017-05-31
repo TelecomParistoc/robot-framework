@@ -31,6 +31,7 @@ class Robot:
         self.expected_callbacks = {'':[0]}
         self.sequence_queue = []
         self.sequence_mutex = Lock()
+        self.color = None
 
         self.expected_callback_indexes = []
         self.current_callback_index = 0
