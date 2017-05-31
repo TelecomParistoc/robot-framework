@@ -36,23 +36,47 @@ class Robot:
         self.current_callback_index = 0
 
         if moving_interface:
-            for module in [motion, motordriver]:
-                for module_attribute in dir(module):
-                    attr = getattr(module, module_attribute)
-                    if callable(attr):
-                        #warning: functions in motion or motordriver does not
-                        #take robot in first argument
-                        #but when we write robot.function(foo), function gets
-                        #actually 2 arguments: robot and foo
-                        #so here we have to remove the first argument
-                        #a more precise adaptation should be done
-                        print attr, attr.__name__
-                        self.add_method((lambda attr_copy: (lambda *args: attr_copy(*args[1:])))(attr),
-                                        name=attr.__name__)
+            self.moving_interface = True
+            self.load_moving_interface()
+        else:
+            self.moving_interface = False
 
         self.started = False
         self.thread = Thread(target=lambda: self.run()).start()
 
+
+
+    def load_moving_interface(self):
+        """
+            loads functions from motion.py and motordriver.py
+            so we can write for instance robot.moveTo(...)
+            It must be called by __init__
+        """
+        for module in [motion, motordriver]:
+            for module_attribute in dir(module):
+                attr = getattr(module, module_attribute)
+                if callable(attr):
+                    #warning: functions in motion or motordriver does not
+                    #take robot in first argument
+                    #but when we write robot.function(foo), function gets
+                    #actually 2 arguments: robot and foo
+                    #so here we have to remove the first argument
+                    #a more precise adaptation should be done
+                    print attr, attr.__name__
+                    self.add_method((lambda attr_copy: (lambda *args: attr_copy(*args[1:])))(attr),
+                                    name=attr.__name__)
+
+    def add_path_to_follow(self, path, max_delay=15):
+        """
+            defines a list of moveTo to follow a list of points [(x0, y0), (x1, y1), ...]
+            These actions are added to the sequence which is currently being defined
+            It's not yet executed!
+            Don't forget that the orientation at the end of the path is not specified!
+        """
+        #TODO in cas of collision, a smart new path could be computed
+        for x, y in path:
+            self.add_parallel(self.moveTo, [x, y, -1])
+            self.wait(max_delay=max_delay)
 
 
     def add_method(self, func, name=None):
