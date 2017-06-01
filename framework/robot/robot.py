@@ -6,6 +6,8 @@ import math
 import motion
 import motordriver
 
+from paths import json_to_python
+
 class Robot:
     """
 	represents a robot on which we can add objects (like AX12 motors for example)
@@ -153,6 +155,11 @@ class Robot:
         """
         #TODO remplacer ce truc scandaleusement stupide (utiliser la couleur si dispo)
         return (self.get_pos_X() + 100, self.get_pos_Y() + 100)
+
+    def load_add_path(self, filename):
+        path = json_to_python(filename, robot.color)
+        self.add_path_to_follow(path)
+
 
     def start_collision_detection(self, front_detection, rear_detection,
                                     delay=0.05, no_sensor_distance=100,
