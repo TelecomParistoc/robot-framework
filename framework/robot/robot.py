@@ -3,6 +3,7 @@ import types
 import time
 import math
 
+
 import json
 from os import listdir
 
@@ -104,6 +105,9 @@ class Robot:
             print "[-] Error in Robot.moveTo; moving_interface is not enable"
             return
 
+        if self.debug:
+            print "[moveTo Python] from ", self.get_pos_X(), self.get_pos_Y(), "to", x_dest, y_dest
+
         self.moveTo_callback_stack.append(callback)
         self.x_dest_stack.append(x_dest)
         self.y_dest_stack.append(y_dest)
@@ -143,7 +147,6 @@ class Robot:
             It's not yet executed!
             Don't forget that the orientation at the end of the path is not specified!
         """
-
         for x, y in path:
             self.add_parallel(self.moveTo, [x, y, -1])
             self.wait(max_delay=max_delay)
@@ -158,7 +161,10 @@ class Robot:
         return (self.get_pos_X() + 100, self.get_pos_Y() + 100)
 
     def load_add_path(self, filename):
-        path = json_to_python(filename, robot.color)
+
+        if self.debug:
+            print "[+] adding path: " + filename
+        path = json_to_python(filename, self.color)
         self.add_path_to_follow(path)
 
 
@@ -716,17 +722,15 @@ class Robot:
 
 ######### Paths ########
 
-PATHS_FOLDER = "paths/"
-
 def json_to_python(filename, color):
     """
         loads a .json and returns a list [(x0, y0), (x1, y1), ...]
-        make sure color is green or orange
+        make sure color is "green" or "orange"
     """
-    with open(PATHS_FOLDER + filename, "r") as f:
+    with open(filename, "r") as f:
         result = json.loads(f.read())
 
-    return [(p['x'], p['y']) for p in result[color][0]['points']]
+    return  [(p['x'], p['y']) for p in result[color][0]['points']]
 
 
 def load_all_path(color):
