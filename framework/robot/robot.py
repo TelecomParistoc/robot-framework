@@ -78,7 +78,7 @@ class Robot:
                 if callable(attr):
 
                     #these functions are already overriden, see below
-                    if attr.__name__ in ["moveTo", "turn", "move"]:
+                    if attr.__name__ in ["moveTo", "move"]:
                         continue
 
                     #warning: functions in motion or motordriver does not
