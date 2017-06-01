@@ -32,6 +32,7 @@ class Robot:
         self.expected_callbacks = {'':[0]}
         self.sequence_queue = []
         self.sequence_mutex = Lock()
+        self.color = None
 
         self.expected_callback_indexes = []
         self.current_callback_index = 0
@@ -41,14 +42,14 @@ class Robot:
             self.actual_path = None
 
             #variables for moveTo
-            self.x_dest = None
-            self.y_dest = None
-            self.final_heading = None
-            self.moveTo_callback = None
+            self.x_dest_stack = []
+            self.y_dest_stack = []
+            self.final_heading_stack = []
+            self.moveTo_callback_stack = []
 
             #variables for move
-            self.goal_dist = None
-            self.move_callback = None
+            self.goal_dist = []
+            self.move_callback = []
             self.load_moving_interface()
         else:
             self.moving_interface = False
@@ -85,40 +86,51 @@ class Robot:
                     self.add_method((lambda attr_copy: (lambda *args: attr_copy(*args[1:])))(attr),
                                     name=attr.__name__)
 
-    def moveTo(self, x_dest, y_dest, final_heading=-1, callback=None):
+    def moveTo(self, x_dest, y_dest, final_heading=-1, callback=None,
+                erase=True):
         """
             this function does the same thing as motion.moveTo, but saves the
             command sent to MotorController. It's usefull to resume the command
             after an emergency stop
+
+            If erase is set to True, all previous orders are forgotten
+            Otherwise, the order is piled on a stack, so the previous orders
+            will be executed afterwards
         """
         if not self.moving_interface:
             print "[-] Error in Robot.moveTo; moving_interface is not enable"
             return
 
-        self.moveTo_callback = callback
-        self.x_dest = x_dest
-        self.y_dest = y_dest
-        self.final_heading  = final_heading
-        motion.moveTo(x_dest, y_dest, final_heading, private_moveTo_callback)
+        self.moveTo_callback_stack.append(callback)
+        self.x_dest_stack.append(x_dest)
+        self.y_dest_stack.append(y_dest)
+        self.final_heading_stack.append(final_heading)
+        motion.moveTo(x_dest, y_dest, final_heading, self.private_moveTo_callback)
 
     def private_moveTo_callback(self):
-        self.x_dest = None
-        self.y_dest = None
-        self.final_heading = None
-        if callable(self.moveTo_callback): self.moveTo_callback()
+        self.x_dest_stack.pop()
+        self.y_dest_stack.pop()
+        self.final_heading_stack.pop()
+        tmp = self.moveTo_callback_stack.pop()
+        if callable(tmp): tmp()
+
+        #if stacks are not empty
+        if self.x_dest_stack:
+            motion.moveTo(self.x_dest_stack[-1], self.y_dest_stack[-1],
+                        self.final_heading_stack[-1], self.private_moveTo_callback)
 
     def move(self, goal_dist, callback=None):
         """
             same thing as moveTo
         """
-        self.goal_dist = goal_dist
-        self.move_callback = callback
+        self.goal_dist.append(goal_dist)
+        self.move_callback.append(callback)
         motion.move(goal_dist, self.private_move_callback)
 
     def private_move_callback(self):
-        self.goal_dist = None
-        self.move_callback = None
-        if callable(self.move_callback): self.move_callback()
+        self.goal_dist.pop()
+        tmp = self.move_callback.pop()
+        if callable(tmp): tmp()
 
 
     def add_path_to_follow(self, path, max_delay=15):
@@ -128,16 +140,25 @@ class Robot:
             It's not yet executed!
             Don't forget that the orientation at the end of the path is not specified!
         """
-        #TODO in cas of collision, a smart new path could be computed
+
         for x, y in path:
             self.add_parallel(self.moveTo, [x, y, -1])
             self.wait(max_delay=max_delay)
 
+    def get_intermediate_goal(self, front_obstacle, rear_obstacle):
+        """
+            computes a new point to reach before going to the final goal
+            the idea is to avoid an obstacle
+            front obstacle, rear_obstacle == booleans
+        """
+        #TODO remplacer ce truc scandaleusement stupide (utiliser la couleur si dispo)
+        return (self.get_pos_X() + 100, self.get_pos_Y() + 100)
 
     def start_collision_detection(self, front_detection, rear_detection,
                                     delay=0.05, no_sensor_distance=100,
                                     table_dimensions=(3000, 2000),
-                                    heading_in_y_direction=0):
+                                    heading_in_y_direction=0,
+                                    sensor_range=200):
         """
             front_detection and rear_detection must be 2 functions without
             parameters, which respectively return True if and only if there is
@@ -156,6 +177,10 @@ class Robot:
 
         def sensor_manager():
 
+            def is_close_from_edge(x, y):
+                return (x < no_sensor_distance or x > table_dimensions[0] - no_sensor_distance
+                    or y < no_sensor_distance or y > table_dimensions[1] - no_sensor_distance)
+
             while self.enable_collision_detection:
 
                 x = self.get_pos_X()
@@ -164,19 +189,28 @@ class Robot:
                 theta = self.get_heading()
                 tmp = (theta - heading_in_y_direction) * math.pi / 180.
 
-                dx = no_sensor_distance * math.sin(tmp)
-                dy = no_sensor_distance * math.cos(tmp)
-                #TODO à finir ! 
+                dx = sensor_range * math.sin(tmp)
+                dy = sensor_range * math.cos(tmp)
 
+                forward_obstacle = False
+                backward_obstacle = False
+                direction = self.getDirection()
 
                 #if the robot is close from an edge, the sensors are ignored
-                if front_detection():
+                if (direction == motion.DIR_FORWARD and front_detection()
+                        and is_close_from_edge(x + dx, y + dy)):
                     print "[!] obstacle detected forwards!"
-                    #TODO react !!!
+                    forward_obstacle = True
 
-                if rear_detection():
+                if (direction == motion.DIR_BACKWARD and rear_detection()
+                        and is_close_from_edge(x - dx, y - dy)):
                     print "[!] obstacle detected backwards!"
-                    #TODO react !!
+                    forward_obstacle = True
+
+                if forward_obstacle or backward_obstacle:
+                    x, y = self.get_intermediate_goal(forward_obstacle,
+                                                        backward_obstacle)
+                    self.moveTo(x, y, final_heading=-1, callback=None)
 
                 time.sleep(delay)
 
