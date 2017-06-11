@@ -13,18 +13,23 @@ Ce dossier contient :
 **Procédure d'installation très facile**
 
 Changer le chemin du fichier de script utilisé par le robot dans program_and_commands.config
+
 Exécuter make install
 
 
 **Procédure d'installation facile**
 
 Exécuter make install
+
 Pour changer le chemin utilisé dans la boucle, modifier le contenu du fichier /var/robot_config/program_path
+
 Pour changer les commandes utilisées pour initialiser les gpio ou lire une valeur de gpio, modifier le contenu du fichier /var/robot_config/commands
 
 
 **Procédure d'installation un peu moins facile**
 
 Exécuter un make pour construire robot_loop_starter
+
 Créer un fichier de configuration contenant 3 lignes : le nom du programme, la commande shell d'initialisation (pull-up/down par exemple), et la commande shell pour obtenir l'état du bouton
+
 Exécuter ./setup.sh robot_loop_starter [chemin vers votre fichier de configuration] [chemin vers l'emplacement utilisé pour savoir quel programme lancer] [chemin vers l'emplacement utilisé pour savoir quelles commandes exécuter]
