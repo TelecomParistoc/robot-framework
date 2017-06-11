@@ -7,7 +7,7 @@ $(TARGET): loop_launch_check_button_state.cpp
 
 install: $(TARGET)
 	chmod u+x setup.sh
-	./setup.sh $(TARGET) program_and_commands.config /var/robot_config/program_path /var/robot_config/commands
+	./setup.sh $(pwd)/$(TARGET) $(pwd)/program_and_commands.config /var/robot_config/program_path /var/robot_config/commands
 	@rm -rf $(TARGET)
 
 clean:
