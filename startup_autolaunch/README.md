@@ -1,4 +1,4 @@
-##Outils pour démarrage automatique du robot##
+## Outils pour démarrage automatique du robot
 
 Ce dossier contient :
 - loop_launch_check_button_state.cpp : Un fichier c++ contenant la boucle de lancement permanent
@@ -10,20 +10,20 @@ Ce dossier contient :
 - README.md : Un README (ce même fichier) qui contient tout ce qui est nécessaire pour comprendre le fonctionnement de cette sous partie du robot
 
 
-*Procédure d'installation très facile*
+**Procédure d'installation très facile**
 
 Changer le chemin du fichier de script utilisé par le robot dans program_and_commands.config
 Exécuter make install
 
 
-*Procédure d'installation facile*
+**Procédure d'installation facile**
 
 Exécuter make install
 Pour changer le chemin utilisé dans la boucle, modifier le contenu du fichier /var/robot_config/program_path
 Pour changer les commandes utilisées pour initialiser les gpio ou lire une valeur de gpio, modifier le contenu du fichier /var/robot_config/commands
 
 
-*Procédure d'installation un peu moins facile*
+**Procédure d'installation un peu moins facile**
 
 Exécuter un make pour construire robot_loop_starter
 Créer un fichier de configuration contenant 3 lignes : le nom du programme, la commande shell d'initialisation (pull-up/down par exemple), et la commande shell pour obtenir l'état du bouton
