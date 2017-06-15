@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     ifs>>initialization;
     ifs>>command;
 
-    system(initialization);
+    system(initialization.c_str());
 
     std::cout<<"Main loop is initialized"<<std::endl;
 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
         ifs>>current_state;
         remove("/tmp/gpio_state");
 
-	    std::cout<<"Read "<<current_state<<" state"<<std::endl;
+	std::cout<<"Read "<<current_state<<" state"<<std::endl;
         if(current_state) // game mode => main program used
         {
             std::ifstream ifs(argv[1], std::ios::in);
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
             else
             {
                 std::cout<<"[+] Executing subprogram "<<program<<std::endl;
-                char* args[] = {program.c_str(), NULL};
+                char* args[] = {(char*)program.c_str(), NULL};
                 if(execv(program.c_str(), args) < 0)
                 {
                     std::cerr<<"[-] Error during execl of "<<program<<std::endl;
