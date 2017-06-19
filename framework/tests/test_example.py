@@ -13,8 +13,8 @@ def ax12_up():
     print "Moving ax12 test"
 
 robot = init()
-robot.AX12_pinces1.moveto((100, 20))                         #no callback => impossible to wait the end of the action
-robot.AX12_pinces2.moveto((200, 10), robot.receive_callback) #callback specified => now robot is able to wait for the end of a number of actions we specify
+robot.AX12_pinces1.move_to((100, 20))                         #no callback => impossible to wait the end of the action
+robot.AX12_pinces2.move_to((200, 10), robot.receive_callback) #callback specified => now robot is able to wait for the end of a number of actions we specify
 robot.wait(1, max_delay=10)                                  #robot wait for 1 callback during a maximum delay of 10s
 
 
@@ -37,10 +37,11 @@ robot.add_parallel(((lambda: move(robot, x=-30, y=250, t=4), True))
 robot.wait()
 
 robot.start_sequence('first_seq')                           #launching sequence
-robot.wait()
-robot.start_last_used(step=2)                               #restarts the last used sequence at step 2 (numbering starts with 1)
+robot.wait_sequence()
+robot.start_last_used(step=1)                               #restarts the last used sequence at step 2 (numbering starts with 1)
 time.sleep(1)
 robot.pause()                                               #pausing a sequence is the only way not to get out of current sequence
 robot.unpause()                                             #sequence continues where it was paused
 
-robot.wait()
+robot.wait_sequence()
+robot.stop()

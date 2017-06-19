@@ -4,8 +4,8 @@ from robot import *
 robot_skeleton = Robot()
 
 def open_AX12_pinces(r):
-    r.AX12_pinces1.moveto((15, 300))
-    r.AX12_pinces2.moveto((85, 70))
+    r.AX12_pinces1.move_to((15, 300))
+    r.AX12_pinces2.move_to((85, 70))
 
 def useless_function():
     print "Insert your useless sentence here"
