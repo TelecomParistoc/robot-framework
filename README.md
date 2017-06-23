@@ -32,3 +32,8 @@ This board is meant to provide localisation to the robots. During the matches, t
 one RadioBoard on each of the three beacons plots and one on each of the robots (both friends and foes).
 The repository for this code can be found [here](https://github.com/TelecomParistoc/Beacons) and the
 board design [here](https://github.com/TelecomParistoc/radioboard).
+
+## libAX12
+This library provides various functions to make use of AX12 digital servomotors. It's
+meant to run on the Raspberry-Pi. It exposes Python and Javascript bindings for an
+easy use. More info can be found [here](https://github.com/TelecomParistoc/libAX12).
