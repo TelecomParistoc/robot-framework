@@ -202,16 +202,18 @@ class Robot:
 
 
     def start_sequence(self, name, step=0):
+        self.sequence_mutex.acquire()
+
         if name is None or name == "":
             if self.debug:
                 print("[-] Unable to start empty sequence")
-                return False
-        elif step+1>=len(sequences[name]):
+            self.sequence_mutex.release()
+            return False
+        elif step+1>=len(self.sequences[name]):
             if self.debug:
                 print("[-] There is not enough steps in sequence "+name+" : step "+str(step)+" is too high")
-                return False
-
-        self.sequence_mutex.acquire()
+            self.sequence_mutex.release()
+            return False
 
         if self.cur_sequence == "" and len(self.sequences[""]) <= 1 and len(self.sequences[""][-1]) == 0:
             self.cur_sequence = name
@@ -237,12 +239,18 @@ class Robot:
 
 
     def start_last_used(self, step=0):
+        self.sequence_mutex.acquire()
+
         if self.last_sequence == "":
             if self.debug:
                 print("[-] Unable to start empty sequence")
-                return False
-
-        self.sequence_mutex.acquire()
+            self.sequence_mutex.release()
+            return False
+        elif step+1>=len(self.sequences[self.last_sequence]):
+            if self.debug:
+                print("[-] There is not enough steps in sequence "+self.last_sequence+" : step "+str(step)+" is too high")
+            self.sequence_mutex.release()
+            return False
 
         if self.cur_sequence == "" and len(self.sequences[""]) <= 1 and len(self.sequences[""][-1]) == 0:
             self.cur_sequence = self.last_sequence
@@ -255,12 +263,6 @@ class Robot:
         else:
             if self.debug:
                 print("[+] Starting sequence "+self.last_sequence+" over "+self.cur_sequence+" at step "+str(step))
-
-        if step >= len(self.sequences[self.last_sequence]):
-            if self.debug:
-                print("[-] There is not enough "+str(len(self.sequences[self.last_sequence]))+" step in "+self.last_sequence)
-            self.sequence_mutex.release()
-            return
 
         self.cur_sequence = self.last_sequence
         self.cur_parallel = step
