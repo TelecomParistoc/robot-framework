@@ -1,6 +1,5 @@
 test:
-	cd ..
-	python -m framework.tests.test_example
+	cd .. && python -m framework.tests.test_example
 
 clean:
-	rm -rf *.pyc
+	rm -f --recursive *.pyc
