@@ -1,63 +1,8 @@
+from ..local_robot.big_robot import *
+
+
+
 if __name__ == "__main__":
-
-    class AX12:
-
-        def __init__(self, id):
-            self.id = id
-
-        def move_to(self, position=(0,0), callback=None):
-            print("[!!] We are moving in AX12 "+str(self.id)+" to "+str(position)+" (to be replaced with interface code)")
-            self.callback = callback
-            t = Thread(target=lambda: self.run()).start()
-
-        def run(self):
-            time.sleep(2.5)
-            if self.callback is not None:
-                self.callback()
-
-    class Singleton(type):
-
-        _instances = {}
-
-        def __call__(cls, *args, **kwargs):
-            if cls not in cls._instances:
-                cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-            return cls._instances[cls]
-
-
-    class Moving_Interface:
-        __metaclass__ = Singleton
-
-        def move_to(self, robot, position):
-            print("[!!!] We are moving to "+str(position)+" (to be replaced with interface code)")
-
-
-    moving_interface = Moving_Interface()
-
-
-
-
-    robot_skeleton = Robot()
-
-    def open_AX12_pinces(r):
-        r.AX12_pinces1.move_to((15, 300))
-        r.AX12_pinces2.move_to((85, 70))
-
-
-    def useless_function(robot):
-        print "[!!] Insert your useless sentence here"
-
-
-    def init():
-        robot_skeleton.add_object(AX12(125), 'AX12_pinces1')
-        robot_skeleton.add_object(AX12(132), 'AX12_pinces2')
-        robot_skeleton.add_methods_of_object(moving_interface)
-        robot_skeleton.add_method(open_AX12_pinces, 'open_AX12_pinces')
-        robot_skeleton.add_method(useless_function, 'useless')
-
-        return robot_skeleton
-
-
 
     #to replace by move of moving_interface
     def move(robot, x, y, t):
