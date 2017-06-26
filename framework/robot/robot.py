@@ -22,6 +22,9 @@ class Robot:
         self.sequence_queue = []
         self.sequence_mutex = Lock()
 
+        self.expected_callback_indexes = []
+        self.current_callback_index = 0
+
         self.started = False
         self.thread = Thread(target=lambda: self.run()).start()
 
@@ -131,7 +134,7 @@ class Robot:
         if self.cur_sequence_constructed != "":
             number_parallels = len(self.temp_sequence)-1
 
-            self.temp_sequence[-1].append(to_call_and_is_callback[0])
+            self.temp_sequence[-1].append(to_call_and_is_callback)
             if to_call_and_is_callback[1]:
                 self.temp_expected_callbacks[-1] += 1
                 if self.debug:
@@ -142,7 +145,7 @@ class Robot:
         elif self.cur_sequence == "" or force_root_seq:
             number_parallels = len(self.sequences[""])
 
-            self.sequences[""][-1].append(to_call_and_is_callback[0])
+            self.sequences[""][-1].append(to_call_and_is_callback)
             if to_call_and_is_callback[1]:
                 self.expected_callbacks[""][-1] += 1
                 if self.debug:
@@ -173,7 +176,7 @@ class Robot:
             if self.debug:
                 print("[++] New step added to current sequence "+self.cur_sequence_constructed+", with a delay of "+str(max_delay))
 
-        elif self.cur_sequence == "":
+        else:
             if len(self.sequences[""][-1]) == 0:
                 if n_callbacks>=0:
                     self.delays[""].append(max_delay)
@@ -197,16 +200,6 @@ class Robot:
 
         self.sequence_mutex.release()
         return True
-
-
-
-    def launch_sequence(self, step):
-        self.sequence_mutex.acquire()
-        for s in self.sequences[self.cur_sequence][step]:
-            self.sequence_mutex.release()
-            s()
-            self.sequence_mutex.acquire()
-        self.sequence_mutex.release()
 
 
 
@@ -299,9 +292,9 @@ class Robot:
             self.sequence_mutex.acquire()
 
         if self.cur_sequence == "" and wait_until_the_end_of_root_sequence:
-            while self.cur_sequence == "" and len(self.delays[""])>0:
+            while self.cur_sequence == "" and (len(self.sequences[""])>1 or len(self.sequences[""][0])>=1):
                 self.sequence_mutex.release()
-                time.sleep(0.01)
+                time.sleep(0.05)
                 self.sequence_mutex.acquire()
 
         if self.debug:
@@ -312,7 +305,10 @@ class Robot:
                     print("[++] Root sequence is finished and "+self.cur_sequence+" started right after")
             else:
                 if self.cur_sequence == '':
-                    print("[+] Sequence "+base+" is finished, returning to root sequence")
+                    if len(self.sequences[""])>1 or len(self.sequences[""][0])>=1:
+                        print("[+] Sequence "+base+" is finished, returning to root sequence")
+                    else:
+                        print("[+] Sequence "+base+" is finished, and all actions in root sequence are done")
                 else:
                     print("[+] Sequence "+base+" is finished, returning to "+self.cur_sequence+" sequence")
 
@@ -320,14 +316,61 @@ class Robot:
 
 
 
-    def receive_callback(self):
+    def launch_sequence(self, step):
         self.sequence_mutex.acquire()
-        self.received_callbacks += 1
-        if self.debug and self.expected_callbacks.get(self.cur_sequence) is not None and self.cur_parallel<self.expected_callbacks[self.cur_sequence]:
-            print("[+] One more callback received (count : "+str(self.received_callbacks)+") out of "+str(self.expected_callbacks[self.cur_sequence][self.cur_parallel]))
-        elif self.debug:
-            print("[-] One more callback received (count : "+str(self.received_callbacks)+") but no expected callback")
+
+        for s,c in self.sequences[self.cur_sequence][step]:
+            self.sequence_mutex.release()
+            if c:
+                if s.__code__.co_argcount != 1:
+                    if self.debug:
+                        print("[-] Unable to execute function waiting for a callback as argument with strictly more or less than 1 argument")
+                else:
+                    s(self.create_callback())
+            else:
+                if s.__code__.co_argcount != 0:
+                    if self.debug:
+                        print("[-] Unable to execute function waiting for strictly non negative number of arguments with 0 argument")
+                else:
+                    s()
+
+            self.sequence_mutex.acquire()
+
         self.sequence_mutex.release()
+
+
+    def create_callback(self):
+        self.sequence_mutex.acquire()
+
+        a = self.current_callback_index
+        f = lambda: self.receive_callback(a)
+        self.expected_callback_indexes.append(self.current_callback_index)
+        self.current_callback_index += 1
+
+        self.sequence_mutex.release()
+
+        return f
+
+
+    def receive_callback(self, index):
+        self.sequence_mutex.acquire()
+
+        if index in self.expected_callback_indexes:
+            self.received_callbacks += 1
+            if self.debug:
+                print("[++] One more callback with ID "+str(index)+" received ("+str(self.received_callbacks)+" out of "+str(len(self.expected_callback_indexes))+")")
+        elif self.debug:
+            print("[-] Callback with ID "+str(index)+" received but it's not an expected callback")
+
+        self.sequence_mutex.release()
+
+
+
+    def reset_waited_callbacks_release_acquire_launch_sequence(self, step=0):
+        self.expected_callback_indexes = []
+        self.sequence_mutex.release()
+        self.launch_sequence(step)
+        self.sequence_mutex.acquire()
 
 
 
@@ -353,7 +396,7 @@ class Robot:
                 self.sequence_mutex.acquire()
 
                 #print(self.cur_sequence, self.cur_parallel, self.sequences[self.cur_sequence], self.delays[self.cur_sequence], self.expected_callbacks[self.cur_sequence], self.sequence_queue)
-                if self.cur_sequence == "" and len(self.delays[""]) == 0:
+                if self.cur_sequence == "" and len(self.sequences[""]) <= 1 and len(self.sequences[""][0]) == 0:
                     print("[...] No action in root sequence, doing nothing")
                 else:
                     deltime = time.time()-prev_time
@@ -362,38 +405,39 @@ class Robot:
                         if self.cur_sequence == "":
                             if self.cur_parallel != 0 and self.debug:
                                 print("[-] Cur parallel is not null whereas we are in root sequence, should not happen")
-                            if len(self.sequences[""][0])>0:
-                                del self.sequences[""][0][0]
 
-                                prev_time = time.time()
-                                self.sequence_mutex.release()
-                                self.launch_sequence(0)
-                                self.sequence_mutex.acquire()
-                            else:
-                                if len(self.delays[""])<=1:
-                                    if len(self.sequence_queue)>0:
-                                        if self.debug:
-                                            print("[++] All actions of root sequence has been done, queue is not empty, popping sequence "+self.sequence_queue[0][0]+" at step "+str(self.sequence_queue[0][1]))
-                                    elif self.debug:
-                                        print("[+++] All actions of root sequence has been done, no more actions")
+                            if len(self.sequences[""])<=1 and len(self.sequences[""][0]) == 0:
+                                if len(self.sequence_queue)>0:
+                                    if self.debug:
+                                        print("[++] All actions of root sequence has been done, queue is not empty, popping sequence "+self.sequence_queue[0][0]+" at step "+str(self.sequence_queue[0][1]))
+                                elif self.debug:
+                                    print("[+++] All actions of root sequence has been done, no more actions")
 
+                            self.cur_parallel = 0
+                            self.received_callbacks = 0
+                            prev_time = time.time()
+
+                            if len(self.sequences[""])>=1:
                                 del self.sequences[""][0]
-                                if len(self.sequences[""]) == 0: #should not happen
-                                    self.sequences = [[]]
                                 del self.delays[""][0]
                                 del self.expected_callbacks[""][0]
-                                self.cur_parallel = 0
-                                self.received_callbacks = 0
-                                if len(self.delays[""])==0:
+
+                                if len(self.sequences[""])>1:
+                                    self.reset_waited_callbacks_release_acquire_launch_sequence()
+                                else:
                                     if len(self.sequence_queue)>0:
                                         self.cur_sequence, self.cur_parallel = self.sequence_queue[0]
-                                        del self.sequence_queue[0]
                                         self.last_sequence = self.cur_sequence
-
-                                        prev_time = time.time()
-                                        self.sequence_mutex.release()
-                                        self.launch_sequence(0)
-                                        self.sequence_mutex.acquire()
+                                        del self.sequence_queue[0]
+                                        self.reset_waited_callbacks_release_acquire_launch_sequence()
+                                    else:
+                                        if len(self.delays[""]) == 0:
+                                            self.delays[""].append(-1)
+                                        if len(self.sequences[""])>0:
+                                            self.reset_waited_callbacks_release_acquire_launch_sequence()
+                            if len(self.sequences[""]) == 0:
+                                self.sequences[""] = [[]]
+                                self.expected_callbacks[""] = [0]
 
                         else:
                             self.cur_parallel += 1
@@ -413,17 +457,13 @@ class Robot:
 
                                 self.cur_parallel = 0
                                 prev_time = time.time()
-                                self.sequence_mutex.release()
-                                self.launch_sequence(0)
-                                self.sequence_mutex.acquire()
+                                self.reset_waited_callbacks_release_acquire_launch_sequence()
 
                                 if self.debug:
                                     print("[+++] Parallel block "+str(prev_parallel)+" done, all actions of sequence "+prev+" has been done, we return to "+seq+" sequence")
                             else:
                                 prev_time = time.time()
-                                self.sequence_mutex.release()
-                                self.launch_sequence(self.cur_parallel)
-                                self.sequence_mutex.acquire()
+                                self.reset_waited_callbacks_release_acquire_launch_sequence(self.cur_parallel)
                                 if self.debug:
                                     if self.cur_sequence != "":
                                         print("[+] Parallel block "+str(self.cur_parallel)+" done in sequence "+self.cur_sequence+"; continuing")
