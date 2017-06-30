@@ -1,7 +1,5 @@
 #include "python_callback.h"
 
-#include <Python.h>
-
 
 static PyObject* callbacks[MAX_CALLBACKS];
 static int keep_callbacks[MAX_CALLBACKS];

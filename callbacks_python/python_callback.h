@@ -2,6 +2,9 @@
 #define PTYHON_CALLBACKS
 
 
+#include <Python.h>
+
+
 #define MAX_CALLBACKS 1000 //defines the maximum number of callbacks that can be kept in memory
 
 
