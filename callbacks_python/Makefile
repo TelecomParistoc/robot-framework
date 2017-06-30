@@ -11,7 +11,7 @@ PREFIX = /usr/local
 VPATH = build/
 
 
-.PHONY: all build clean tests AX12console jsinstall
+.PHONY: all build clean install
 
 all: build build/$(TARGET)
 
