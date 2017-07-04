@@ -11,6 +11,11 @@
 extern "C" {
 #endif
 
+	int add_callback(PyObject* callback, int keep_when_used);
+	int remove_callback(int index);
+	int call_python_callback(int index);
+	int callbacks_queue_size();
+
 	int call_after_delay(float time, PyObject* callback);
 	int local_exported_queue_size();
 	int empty_queue_callback();
