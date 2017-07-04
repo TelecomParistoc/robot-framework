@@ -27,11 +27,11 @@ int add_callback(PyObject* callback, int keep_when_used)
         return -1;
 
     PyObject *temp;
-    printf("a\n");
-    if (PyArg_ParseTuple(callback, "O:set_callback", &temp))
+    printf("a %lx %x\n", (long int)callback, keep_when_used);
+    if(PyArg_ParseTuple(callback, "O:set_callback", &temp))
     {
         printf("b\n");
-        if (!PyCallable_Check(temp))
+        if(!PyCallable_Check(temp))
         {
             printf("c\n");
             PyErr_SetString(PyExc_TypeError, "parameter must be callable");
