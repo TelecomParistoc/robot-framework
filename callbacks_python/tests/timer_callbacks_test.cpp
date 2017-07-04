@@ -44,7 +44,7 @@ void run()
 		main_mutex.lock();
 
 		for(int i=0; i<(int)done.size(); i++)
-			if(!done[i] && delays[i]>duration.count())
+			if(!done[i] && delays[i]<duration.count())
 			{
 				done[i] = true;
 				std::cout<<"Calling python callback with index "<<callback_index[i]<<" => return code : "<<call_python_callback(callback_index[i])<<std::endl;
