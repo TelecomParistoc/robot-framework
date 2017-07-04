@@ -59,6 +59,8 @@ int call_python_callback(int index)
     {
         printf("Calling %d %lx\n", index, (long int)callbacks[index]);
 
+        if(!keep_callbacks[index])
+            callbacks[index] = NULL;
         return 0;
 
         PyObject *result;
