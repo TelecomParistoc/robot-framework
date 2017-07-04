@@ -15,10 +15,13 @@ int add_callback(PyObject* callback, int keep_when_used)
     if(index>=MAX_CALLBACKS)
         return -1;
 
+<<<<<<< HEAD
     printf("Returning %d\n", index);
     callbacks[index] = (PyObject*)0xaaabbbcc;
     return index;
 
+=======
+>>>>>>> 910333805fe40af2ff393663af29e73cfe84461f
     PyObject *temp;
     if (PyArg_ParseTuple(callback, "O:set_callback", &temp))
     {
@@ -30,6 +33,8 @@ int add_callback(PyObject* callback, int keep_when_used)
         Py_XINCREF(temp);
         callbacks[index] = temp;
         keep_callbacks[index] = keep_when_used;
+
+        printf("Returning %d %lx\n", index, (long int)temp);
 
         return index;
     }
