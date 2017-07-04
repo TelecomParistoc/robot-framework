@@ -16,14 +16,19 @@ int add_callback(PyObject* callback, int keep_when_used)
         return -1;
 
     PyObject *temp;
+    printf("a");
     if (PyArg_ParseTuple(callback, "O:set_callback", &temp))
     {
+        printf("b");
         if (!PyCallable_Check(temp))
         {
+            printf("c");
             PyErr_SetString(PyExc_TypeError, "parameter must be callable");
             return -1;
         }
+        printf("d");
         Py_XINCREF(temp);
+        printf("e");
         callbacks[index] = temp;
         keep_callbacks[index] = keep_when_used;
 
