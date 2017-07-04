@@ -62,6 +62,7 @@ int create_thread()
 
 int call_after_delay(float time, PyObject* callback)
 {
+	std::cout<<"Adding "<<time<<std::endl;
 	if(!is_running)
 		if(create_thread()<0)
 			return -1;
