@@ -20,3 +20,5 @@ for i in range(n_callbacks):
 while int(lib.empty_queue_callback()) == 0:
 	print(lib.callbacks_queue_size())
 	time.sleep(0.01)
+
+lib.join()

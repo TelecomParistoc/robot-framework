@@ -7,6 +7,20 @@
 #include <mutex>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	int call_after_delay(float time, PyObject* callback);
+	int local_exported_queue_size();
+	int empty_queue_callback();
+	void join();
+
+#ifdef __cplusplus
+}
+#endif
+
+
 bool is_running = false;
 std::mutex main_mutex;
 std::thread main_thread;
@@ -58,6 +72,11 @@ int call_after_delay(float time, PyObject* callback)
 	main_mutex.unlock();
 
 	return 0;
+}
+
+int local_exported_queue_size()
+{
+	return callbacks_queue_size();
 }
 
 int empty_queue_callback()
