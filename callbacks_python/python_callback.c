@@ -4,10 +4,20 @@
 
 static PyObject* callbacks[MAX_CALLBACKS];
 static int keep_callbacks[MAX_CALLBACKS];
+static int initialized = 0;
 
+
+void initialize()
+{
+    Py_Initialize();
+    initialized = 1;
+}
 
 int add_callback(PyObject* callback, int keep_when_used)
 {
+    if(!initialized)
+        initialize();
+
     int index = 0;
     while(index<MAX_CALLBACKS && callbacks[index])
         index++;
@@ -56,6 +66,9 @@ int remove_callback(int index)
 
 int call_python_callback(int index)
 {
+    if(index<0 || index>=MAX_CALLBACKS)
+        return -1;
+
     if(!callbacks[index])
         return -1;
     else
