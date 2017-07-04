@@ -3,7 +3,7 @@ SRCS = python_callback.c
 HEADERS = $(addprefix ./, ${SRCS:.c=.h})
 OBJECTS = $(addprefix build/,${SRCS:.c=.o})
 
-TESTS = timer_callbacks_test.so
+TESTS = tests/timer_callbacks_test.so
 TESTS_PYTHON = tests/timer_callbacks_test.py
 
 CC = gcc
@@ -34,7 +34,7 @@ build/$(TARGET): $(OBJECTS)
 	@$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS)
 
 
-%.so: %.cpp
+tests/%.so: tests/%.cpp
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 tests: CC=g++
@@ -47,7 +47,7 @@ $(TESTS_PYTHON):
 
 
 clean:
-	rm -f build/*.o build/*.so build/*.d
+	rm -rf build
 	rm -f $(TESTS)
 
 install: build/$(TARGET)
