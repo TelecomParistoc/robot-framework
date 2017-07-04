@@ -10,6 +10,7 @@ static int initialized = 0;
 void initialize()
 {
     Py_Initialize();
+    printf("Initializeing\n");
     initialized = 1;
 }
 
