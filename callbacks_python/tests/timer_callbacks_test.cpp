@@ -32,6 +32,8 @@ std::vector<int> callback_index;
 
 void run()
 {
+	std::cout<<"[+] Starting thread"<<std::endl;
+
 	auto start = std::chrono::high_resolution_clock::now();
 
 	is_running = true;
@@ -62,15 +64,21 @@ int create_thread()
 
 int call_after_delay(float time, PyObject* callback)
 {
-	std::cout<<"Adding "<<time<<std::endl;
 	if(!is_running)
 		if(create_thread()<0)
+		{
+			std::cerr<<"[-] Unable to create thread"<<std::endl;
 			return -1;
+		}
 
+	std::cout<<time<<std::endl;
+	std::cout<<delays.size()<<std::endl;
+	std::cout<<done.size()<<std::endl;
 	main_mutex.lock();
 	delays.push_back(time);
 	done.push_back(false);
-	callback_index.push_back(add_callback(callback, 0));
+	callback_index.push_back(callback_index.size());
+	//callback_index.push_back(add_callback(callback, 0));
 	main_mutex.unlock();
 
 	return 0;
