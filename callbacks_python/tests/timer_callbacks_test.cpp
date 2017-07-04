@@ -1,3 +1,4 @@
+#include <Python.h>
 #include <unistd.h>
 #include <iostream>
 #include <vector>
@@ -57,6 +58,7 @@ void run()
 
 int create_thread()
 {
+	PyEval_InitThreads();
 	main_thread = std::thread(run);
 	return main_thread.joinable();
 }
