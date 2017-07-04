@@ -1,3 +1,9 @@
+/*
+*  Following functions describe a not yet thread safe interface in order to call python from C.
+*  If you want to allow the programmer to specify a python callback that is called when an action is finished (motor at right position for instance),
+*  you MUST take the callback argument as a PyObject*, passing it to add_callback function, and keeping the index returned in order to call call_python_callback with this index.
+*/
+
 #ifndef PYTHON_CALLBACKS
 #define PTYHON_CALLBACKS
 
@@ -38,6 +44,11 @@ int remove_callback(int index);
 *       -2 if python call failed
 */
 int call_python_callback(int index);
+
+
+/* returns size of current table of current stored callbacks
+*/
+int callbacks_queue_size();
 
 
 #endif

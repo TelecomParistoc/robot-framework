@@ -66,3 +66,14 @@ int call_python_callback(int index)
         return 0;
     }
 }
+
+
+int callbacks_queue_size()
+{
+    int index = 0, n = 0;
+    for(; index<MAX_CALLBACKS; index++)
+        if(callbacks[index])
+            n++;
+
+    return n;
+}

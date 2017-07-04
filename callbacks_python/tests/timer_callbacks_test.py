@@ -18,4 +18,5 @@ for i in range(n_callbacks):
 	timer_launch(common_callback, float(random.randomint(10,1000)/50.0), i, lib)
 
 while int(lib.empty_queue_callback()) == 0:
+	print(lib.callbacks_queue_size())
 	time.sleep(0.01)
