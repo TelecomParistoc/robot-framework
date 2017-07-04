@@ -16,7 +16,7 @@ int add_callback(PyObject* callback, int keep_when_used)
         return -1;
 
     printf("Returning %d\n", index);
-    callbacks[index] = 0xaaabbbcc;
+    callbacks[index] = (PyObject*)0xaaabbbcc;
     return index;
 
     PyObject *temp;
@@ -57,7 +57,7 @@ int call_python_callback(int index)
         return -1;
     else
     {
-        printf("Calling %d %llx\n", index, callbacks[index]);
+        printf("Calling %d %lx\n", index, (long int)callbacks[index]);
 
         return 0;
 
