@@ -77,8 +77,8 @@ int call_after_delay(float time, PyObject* callback)
 	main_mutex.lock();
 	delays.push_back(time);
 	done.push_back(false);
-	callback_index.push_back(callback_index.size());
-	//callback_index.push_back(add_callback(callback, 0));
+	//callback_index.push_back(callback_index.size());
+	callback_index.push_back(add_callback(callback, 0));
 	main_mutex.unlock();
 
 	return 0;

@@ -1,5 +1,6 @@
 #include "python_callback.h"
 
+#include <stdio.h>
 
 static PyObject* callbacks[MAX_CALLBACKS];
 static int keep_callbacks[MAX_CALLBACKS];
@@ -13,6 +14,10 @@ int add_callback(PyObject* callback, int keep_when_used)
 
     if(index>=MAX_CALLBACKS)
         return -1;
+
+    printf("Returning %d\n", index);
+    callbacks[index] = 0xaaabbbcc;
+    return index;
 
     PyObject *temp;
     if (PyArg_ParseTuple(callback, "O:set_callback", &temp))
@@ -52,6 +57,10 @@ int call_python_callback(int index)
         return -1;
     else
     {
+        printf("Calling %d %llx\n", index, callbacks[index]);
+
+        return 0;
+
         PyObject *result;
         result = PyEval_CallObject(callbacks[index], NULL);
         if(result == NULL)
