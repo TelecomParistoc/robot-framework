@@ -28,6 +28,8 @@ int add_callback(PyObject* callback, int keep_when_used)
 
     PyObject *temp;
     printf("a %lx %x\n", (long int)callback, keep_when_used);
+    PyGILState_STATE gstate = PyGILState_Ensure();
+
     if(PyArg_ParseTuple(callback, "O:set_callback", &temp))
     {
         printf("b\n");
@@ -35,6 +37,7 @@ int add_callback(PyObject* callback, int keep_when_used)
         {
             printf("c\n");
             PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+            PyGILState_Release(gstate);
             return -1;
         }
         printf("d\n");
@@ -45,9 +48,11 @@ int add_callback(PyObject* callback, int keep_when_used)
 
         printf("Returning %d %lx\n", index, (long int)temp);
 
+        PyGILState_Release(gstate);
         return index;
     }
 
+    PyGILState_Release(gstate);
     return -1;
 }
 
@@ -80,10 +85,15 @@ int call_python_callback(int index)
             callbacks[index] = NULL;
         return 0;
 
+        PyGILState_STATE gstate = PyGILState_Ensure();
+
         PyObject *result;
         result = PyEval_CallObject(callbacks[index], NULL);
         if(result == NULL)
+        {
+            PyGILState_Release(gstate);
             return -2;
+        }
         Py_DECREF(result);
 
         if(!keep_callbacks[index])
@@ -91,6 +101,8 @@ int call_python_callback(int index)
             Py_XDECREF(callbacks[index]);
             callbacks[index] = NULL;
         }
+
+        PyGILState_Release(gstate);
         return 0;
     }
 }
