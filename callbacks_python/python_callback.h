@@ -5,7 +5,7 @@
 */
 
 #ifndef PYTHON_CALLBACKS
-#define PTYHON_CALLBACKS
+#define PYTHON_CALLBACKS
 
 
 #include <Python.h>
