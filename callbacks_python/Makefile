@@ -6,6 +6,8 @@ OBJECTS = $(addprefix build/,${SRCS:.c=.o})
 TESTS = tests/timer_callbacks_test.so
 TESTS_PYTHON = tests/timer_callbacks_test.py
 
+C_TESTS = tests/libfct_bidon.so
+
 CC = gcc
 CFLAGS = -O2 -std=gnu99 -I/usr/include/python2.7 -Wall -Werror -fpic
 LDFLAGS= -shared
@@ -14,7 +16,7 @@ PREFIX = /usr/local
 VPATH = build/ tests/
 
 
-.PHONY: all build clean install tests
+.PHONY: all build clean install tests C_tests
 
 
 all: build build/$(TARGET)
@@ -44,6 +46,12 @@ tests: $(TESTS) $(TESTS_PYTHON)
 
 $(TESTS_PYTHON):
 	python $(TESTS_PYTHON)
+
+
+
+C_tests:
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(C_TESTS) tests/fonctions_bidons.c
+C_tests: LDFLAGS=-lpython_callback -lpython2.7 -shared
 
 
 clean:

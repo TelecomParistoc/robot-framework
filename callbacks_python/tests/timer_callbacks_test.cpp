@@ -60,7 +60,7 @@ int create_thread()
 {
 	PyEval_InitThreads();
 	main_thread = std::thread(run);
-	PyEval_SaveThread();
+	//PyEval_SaveThread();
 	return main_thread.joinable();
 }
 

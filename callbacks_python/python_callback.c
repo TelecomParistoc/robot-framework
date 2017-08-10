@@ -9,8 +9,8 @@ static int initialized = 0;
 
 void initialize()
 {
-    Py_Initialize();
-    printf("Initializeing\n");
+    //Py_Initialize();
+    printf("Initialization has been removed\n");
     initialized = 1;
 }
 
@@ -27,8 +27,11 @@ int add_callback(PyObject* callback, int keep_when_used)
         return -1;
 
     PyObject *temp;
-    printf("a %lx %x\n", (long int)callback, keep_when_used);
+    //printf("a %lx %x\n", (long int)callback, keep_when_used);
     PyGILState_STATE gstate = PyGILState_Ensure();
+
+    printf("python_callback.c : callback index = %d", index);
+
 
     if(PyArg_ParseTuple(callback, "O:set_callback", &temp))
     {
@@ -79,7 +82,7 @@ int call_python_callback(int index)
         return -1;
     else
     {
-        printf("Calling %d %llx\n", index, callbacks[index]);
+        //printf("Calling %d %llx\n", index, callbacks[index]);
 
         if(!keep_callbacks[index])
             callbacks[index] = NULL;
