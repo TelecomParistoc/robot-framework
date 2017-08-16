@@ -49,7 +49,7 @@ $(TESTS_PYTHON):
 
 
 
-C_tests:
+C_tests: build install
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(C_TESTS) tests/fonctions_bidons.c
 C_tests: LDFLAGS=-lpython_callback -lpython2.7 -shared
 

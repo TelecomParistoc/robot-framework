@@ -9,7 +9,7 @@ static int initialized = 0;
 
 void initialize()
 {
-    //Py_Initialize();
+    Py_Initialize();
     printf("Initialization has been removed\n");
     initialized = 1;
 }
@@ -20,17 +20,20 @@ int add_callback(PyObject* callback, int keep_when_used)
         initialize();
 
     int index = 0;
+
     while(index<MAX_CALLBACKS && callbacks[index])
         index++;
+
 
     if(index>=MAX_CALLBACKS)
         return -1;
 
     PyObject *temp;
-    //printf("a %lx %x\n", (long int)callback, keep_when_used);
+    printf("a %lx %x\n", (long int)callback, keep_when_used);
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    printf("python_callback.c : callback index = %d", index);
+
+    printf("python_callback.c : callback index = %d \n", index);
 
 
     if(PyArg_ParseTuple(callback, "O:set_callback", &temp))
@@ -54,7 +57,7 @@ int add_callback(PyObject* callback, int keep_when_used)
         PyGILState_Release(gstate);
         return index;
     }
-
+    printf("Error : callback was not added\n");
     PyGILState_Release(gstate);
     return -1;
 }
@@ -91,7 +94,11 @@ int call_python_callback(int index)
         PyGILState_STATE gstate = PyGILState_Ensure();
 
         PyObject *result;
-        result = PyEval_CallObject(callbacks[index], NULL);
+
+	PyObject *empty_tuple = PyTuple_New(0);
+        result = PyEval_CallObject(callbacks[index], empty_tuple);
+	Py_DECREF(empty_tuple);
+
         if(result == NULL)
         {
             PyGILState_Release(gstate);
