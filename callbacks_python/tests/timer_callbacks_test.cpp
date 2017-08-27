@@ -47,7 +47,8 @@ void run()
 			if(!done[i] && delays[i]<duration.count())
 			{
 				done[i] = true;
-				std::cout<<"Calling python callback with index "<<callback_index[i]<<" => return code : "<<call_python_callback(callback_index[i])<<std::endl;
+				std::cout<<"Calling python callback with index "<<callback_index[i]<<" => return code : ";
+				std::cout<<call_python_callback(callback_index[i])<<std::endl;
 			}
 
 		main_mutex.unlock();
@@ -58,9 +59,11 @@ void run()
 
 int create_thread()
 {
+	initialize();
 	PyEval_InitThreads();
+	PyEval_ReleaseLock();
+	assert(PyEval_ThreadsInitialized());
 	main_thread = std::thread(run);
-	PyEval_SaveThread();
 	return main_thread.joinable();
 }
 

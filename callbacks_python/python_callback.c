@@ -17,7 +17,10 @@ void initialize()
 int add_callback(PyObject* callback, int keep_when_used)
 {
     if(!initialized)
-        initialize();
+    {
+	fprintf(stderr, "Non initilized !\n");
+	exit(1);
+    }
 
     int index = 0;
     while(index<MAX_CALLBACKS && callbacks[index])
@@ -29,6 +32,7 @@ int add_callback(PyObject* callback, int keep_when_used)
     PyObject *temp;
     printf("a %lx %x\n", (long int)callback, keep_when_used);
     PyGILState_STATE gstate = PyGILState_Ensure();
+    printf("%d\n", gstate);
 
     if(PyArg_ParseTuple(callback, "O:set_callback", &temp))
     {

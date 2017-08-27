@@ -14,6 +14,9 @@
 #define MAX_CALLBACKS 1000 //defines the maximum number of callbacks that can be kept in memory
 
 
+void initialize();
+
+
 /* performs insertion of python callback in a table waiting for it to be called or keeping it
 *  common arguments :
 *       callback : the python callback object to be called
