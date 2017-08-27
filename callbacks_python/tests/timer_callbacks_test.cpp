@@ -1,3 +1,4 @@
+#include <functional>
 #include <Python.h>
 #include <unistd.h>
 #include <iostream>
@@ -13,7 +14,7 @@ extern "C" {
 
 	#include "python_callback/python_callback.h"
 
-	int call_after_delay(float time, PyObject* callback);
+	int call_after_delay(float time, void (* fct)()* callback);
 	int empty_queue_callback();
 	void join();
 
@@ -27,7 +28,7 @@ std::mutex main_mutex;
 std::thread main_thread;
 std::vector<bool> done;
 std::vector<float> delays;
-std::vector<int> callback_index;
+std::vector<std::function<void(void)> > callbacks;
 
 
 void run()
@@ -47,7 +48,7 @@ void run()
 			if(!done[i] && delays[i]<duration.count())
 			{
 				done[i] = true;
-				std::cout<<"Calling python callback with index "<<callback_index[i]<<" => return code : "<<call_python_callback(callback_index[i])<<std::endl;
+				std::cout<<"Calling python callback with index "<<i<<" => return code : "<<callbacks[i]()<<std::endl;
 			}
 
 		main_mutex.unlock();
@@ -58,13 +59,13 @@ void run()
 
 int create_thread()
 {
-	PyEval_InitThreads();
+	//PyEval_InitThreads();
 	main_thread = std::thread(run);
 	//PyEval_SaveThread();
 	return main_thread.joinable();
 }
 
-int call_after_delay(float time, PyObject* callback)
+int call_after_delay(float time, void (* fct)()* callback)
 {
 	if(!is_running)
 		if(create_thread()<0)
@@ -80,7 +81,7 @@ int call_after_delay(float time, PyObject* callback)
 	delays.push_back(time);
 	done.push_back(false);
 	//callback_index.push_back(callback_index.size());
-	callback_index.push_back(add_callback(callback, 0));
+	callbacks.push_back(std::function<void()>(callback));
 	main_mutex.unlock();
 
 	return 0;
