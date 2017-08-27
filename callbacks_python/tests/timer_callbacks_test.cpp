@@ -1,5 +1,4 @@
 #include <functional>
-#include <Python.h>
 #include <unistd.h>
 #include <iostream>
 #include <vector>
@@ -8,14 +7,15 @@
 #include <mutex>
 
 
+typedef void (*c_fct_ptr)(void);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	#include "python_callback/python_callback.h"
-
-	int call_after_delay(float time, void (* fct)()* callback);
+	int call_after_delay(float time, c_fct_ptr callback);
 	int empty_queue_callback();
+	int done_callbacks();
 	void join();
 
 #ifdef __cplusplus
@@ -24,11 +24,12 @@ extern "C" {
 
 
 bool is_running = false;
+size_t number_done = 0;
 std::mutex main_mutex;
 std::thread main_thread;
 std::vector<bool> done;
 std::vector<float> delays;
-std::vector<std::function<void(void)> > callbacks;
+std::vector<std::function<void()> > callbacks;
 
 
 void run()
@@ -44,6 +45,7 @@ void run()
 
 		main_mutex.lock();
 
+		number_done = 0;
 		for(int i=0; i<(int)done.size(); i++)
 			if(!done[i] && delays[i]<duration.count())
 			{
@@ -51,6 +53,8 @@ void run()
 				std::cout<<"Calling python callback with index "<<i<<std::endl;
 				callbacks[i]();
 			}
+			else if(done[i])
+				number_done++;
 
 		main_mutex.unlock();
 
@@ -66,7 +70,7 @@ int create_thread()
 	return main_thread.joinable();
 }
 
-int call_after_delay(float time, void (* fct)()* callback)
+int call_after_delay(float time, c_fct_ptr callback)
 {
 	if(!is_running)
 		if(create_thread()<0)
@@ -81,8 +85,11 @@ int call_after_delay(float time, void (* fct)()* callback)
 	main_mutex.lock();
 	delays.push_back(time);
 	done.push_back(false);
-	//callback_index.push_back(callback_index.size());
-	callbacks.push_back(std::function<void()>(callback));
+	callback();
+	callbacks.push_back(std::function<void(void)>(std::bind(callback)));
+	callbacks[callbacks.size()-1]();
+	std::cout<<"ok "<<std::hex<<callback<<std::endl;
+	printf("%p\n", callback);
 	main_mutex.unlock();
 
 	return 0;
@@ -91,14 +98,20 @@ int call_after_delay(float time, void (* fct)()* callback)
 int empty_queue_callback()
 {
 	main_mutex.lock();
-	int s = callbacks_queue_size();
+	size_t s = number_done;
 	main_mutex.unlock();
-	if(s<0)
-		return s;
-	else if(!s)
-		return 1;
-	else
+	if(s<done.size())
 		return 0;
+	else
+		return 1;
+}
+
+int done_callbacks()
+{
+	main_mutex.lock();
+	size_t r = number_done;
+	main_mutex.unlock();
+	return r;
 }
 
 void join()

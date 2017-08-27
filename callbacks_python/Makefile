@@ -6,7 +6,6 @@ OBJECTS = $(addprefix build/,${SRCS:.c=.o})
 TESTS = tests/timer_callbacks_test.so
 TESTS_PYTHON = tests/timer_callbacks_test.py
 
-C_TESTS = tests/libfct_bidon.so
 
 CC = gcc
 CFLAGS = -O2 -std=gnu99 -I/usr/include/python2.7 -Wall -Werror -fpic
@@ -40,7 +39,7 @@ tests/%.so: tests/%.cpp
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 tests: CC=g++
-tests: LDFLAGS=-lpython_callback -lpython2.7 -shared
+tests: LDFLAGS=-lpython2.7 -shared
 tests: CFLAGS=-O2 -std=c++11 -I/usr/include/python2.7 -Wall -Werror -fpic
 tests: $(TESTS) $(TESTS_PYTHON)
 
