@@ -63,5 +63,8 @@ def remove_callbacks_on_gpio(id):
 def remove_all_callback():
     lib_gpio.remove_all_callback(ctypes.c_int(id))
 
+def init():
+    lib_gpio.init()
+
 def join():
     lib_gpio.join()
