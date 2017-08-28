@@ -18,7 +18,6 @@ def encapsulate_callback(callback, one_shot=False):
         mapped_callbacks[counter] = ctypes.CFUNCTYPE(None)(lambda_remove_ref)
     else:
         mapped_callbacks[counter] = ctypes.CFUNCTYPE(None)(callback)
-    print(mapped_callbacks[counter])
     return mapped_callbacks[counter]
 
 
