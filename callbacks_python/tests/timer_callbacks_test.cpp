@@ -92,7 +92,7 @@ int call_after_delay(float time, c_fct_ptr callback)
 	printf("%p\n", callback);
 	main_mutex.unlock();
 
-	for(int i=0; i<30; i++)
+	for(int i=0; i<80; i++)
 		printf("%x ", *((char *)(callback)+i));
 	std::cout<<std::endl;
 
