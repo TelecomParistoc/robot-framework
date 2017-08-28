@@ -7,17 +7,23 @@ mapped_callbacks = {}
 counter = 0
 
 
+def call_and_delete(index, callback):
+    global mapped_callbacks
+    callback()
+    del mapped_callbacks[index]
+
 def encapsulate_callback(callback, one_shot=False):
     global mapped_callbacks
     global counter
 
     counter += 1
+    local_index = counter
     if one_shot:
-        print("Removing counter "+str(counter))
-        lambda_remove_ref = lambda: callback(); del mapped_callbacks[counter]
+        lambda_remove_ref = lambda: call_and_delete(local_index, callback)
         mapped_callbacks[counter] = ctypes.CFUNCTYPE(None)(lambda_remove_ref)
     else:
         mapped_callbacks[counter] = ctypes.CFUNCTYPE(None)(callback)
+
     return mapped_callbacks[counter]
 
 
