@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #coding: utf8
 
+
 from encapsulate_callback import encapsulate_callback
 import random
 import ctypes
