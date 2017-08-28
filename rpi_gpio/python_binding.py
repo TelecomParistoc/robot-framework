@@ -7,18 +7,6 @@ from encapsulate_callback import encapsulate_callback
 lib_gpio = ctypes.cdll.LoadLibrary(open("lib_path").read().split('\n')[0])
 
 
-
-void remove_callbacks_on_gpio_change(int id);
-void remove_callbacks_on_gpio_down(int id);
-void remove_callbacks_on_gpio_up(int id);
-void remove_callbacks_on_gpio(int id);
-void remove_all_callback();
-
-void join();
-
-
-
-
 def get_pin_state(id):
     assert (isinstance(id, int))
 
