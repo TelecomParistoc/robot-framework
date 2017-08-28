@@ -34,6 +34,7 @@ std::vector<std::function<void()> > callbacks;
 
 void run()
 {
+	std::cout<<"[+] Executing multithread python callback with delay calls"<<std::endl;
 	std::cout<<"[+] Starting thread"<<std::endl;
 
 	auto start = std::chrono::high_resolution_clock::now();

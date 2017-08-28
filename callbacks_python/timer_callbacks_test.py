@@ -14,8 +14,8 @@ def timer_launch(time, index, lib):
 	func.append(ctypes.CFUNCTYPE(None)(lambda: common_callback(index, time)))
 	return lib.call_after_delay(ctypes.c_float(time), func[-1])
 
-lib = ctypes.cdll.LoadLibrary("/home/pi/robot-framework/callbacks_python/tests/timer_callbacks_test.so")
-#lib = ctypes.cdll.LoadLibrary("./timer_callbacks_test.so") #"/usr/local/lib/libpython_callback.so")
+#lib = ctypes.cdll.LoadLibrary("/home/pi/robot-framework/callbacks_python/tests/timer_callbacks_test.so")
+lib = ctypes.cdll.LoadLibrary("./timer_callbacks_test.so")
 
 n_callbacks = 20
 
