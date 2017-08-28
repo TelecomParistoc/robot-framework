@@ -39,11 +39,11 @@ class GPIO
         std::vector<_callback> _attached_on_down;
         std::vector<_callback> _attached_on_up;
 
-        std::vector<bool> _attached_on_change_one_shot;
-        std::vector<bool> _attached_on_down_one_shot;
-        std::vector<bool> _attached_on_up_one_shot;
+        std::vector<size_t> _attached_on_change_one_shot;
+        std::vector<size_t> _attached_on_down_one_shot;
+        std::vector<size_t> _attached_on_up_one_shot;
 
-        void remove_called_one_shot(std::vector<_callback>& callbacks, std::vector<bool>& one_shot_index);
+        void remove_called_one_shot(std::vector<_callback>& callbacks, std::vector<size_t>& one_shot_index);
 };
 
 

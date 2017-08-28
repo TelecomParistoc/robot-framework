@@ -5,6 +5,9 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <map>
+
+#include "gpio.h"
 
 
 typedef void (*c_fct_ptr)(void);

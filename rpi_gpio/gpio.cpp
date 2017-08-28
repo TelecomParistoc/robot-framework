@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "gpio.h"
 
 
@@ -46,7 +48,7 @@ void GPIO::clean_callbacks()
 }
 
 
-void GPIO::remove_called_one_shot(std::vector<_callback>& callbacks, std::vector<bool>& one_shot_index)
+void GPIO::remove_called_one_shot(std::vector<_callback>& callbacks, std::vector<size_t>& one_shot_index)
 {
     size_t i = 0, current = 0, max = one_shot_index.size();
 
@@ -54,9 +56,9 @@ void GPIO::remove_called_one_shot(std::vector<_callback>& callbacks, std::vector
         std::remove_if(
             callbacks.begin(),
             callbacks.end(),
-            []() -> bool
+            [&i, &current, &max, &one_shot_index](_callback& c) -> bool
             {
-                if(current >= size)
+                if(current >= max)
                     return false;
 
                 bool r = false;

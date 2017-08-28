@@ -13,10 +13,10 @@ LDFLAGS = -shared
 .PHONY: all test clean
 
 
-all: test
+all: $(TARGET)
 
 %.so: $(SRCS)
-	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 
 test: $(TARGET)
 	python $(PYTHON_EXE)
@@ -25,7 +25,7 @@ install: $(TARGET)
 	cp $(PYTHON_BINDING) $(LOCAL_PYTHON)
 	mkdir -p $(PREFIX)
 	cp $(TARGET) $(PREFIX)
-	chmod 0755 $(PREFIX)/lib/$(TARGET)
+	chmod 0755 $(PREFIX)/$(TARGET)
 	ldconfig
 	ldconfig -p | grep GPIO
 
