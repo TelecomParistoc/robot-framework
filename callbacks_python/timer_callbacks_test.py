@@ -11,7 +11,7 @@ def common_callback(index, time):
 	print "Callback with index "+str(index)+" reached after a "+str(time)+" seconds delay"
 
 def timer_launch(time, index, lib):
-	t = encapsulate_callback(lambda: common_callback(index, time))
+	t = encapsulate_callback(lambda: common_callback(index, time), True)
 	print t
 	return lib.call_after_delay(ctypes.c_float(time), t)
 
