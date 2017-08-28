@@ -1,4 +1,4 @@
-#include <Python.h>
+#include <functional>
 #include <unistd.h>
 #include <iostream>
 #include <vector>
@@ -7,14 +7,15 @@
 #include <mutex>
 
 
+typedef void (*c_fct_ptr)(void);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-	#include "python_callback/python_callback.h"
-
-	int call_after_delay(float time, PyObject* callback);
+	int call_after_delay(float time, c_fct_ptr callback);
 	int empty_queue_callback();
+	int done_callbacks();
 	void join();
 
 #ifdef __cplusplus
@@ -23,11 +24,12 @@ extern "C" {
 
 
 bool is_running = false;
+size_t number_done = 0;
 std::mutex main_mutex;
 std::thread main_thread;
 std::vector<bool> done;
 std::vector<float> delays;
-std::vector<int> callback_index;
+std::vector<std::function<void()> > callbacks;
 
 
 void run()
@@ -43,13 +45,16 @@ void run()
 
 		main_mutex.lock();
 
+		number_done = 0;
 		for(int i=0; i<(int)done.size(); i++)
 			if(!done[i] && delays[i]<duration.count())
 			{
 				done[i] = true;
-				std::cout<<"Calling python callback with index "<<callback_index[i]<<" => return code : ";
-				std::cout<<call_python_callback(callback_index[i])<<std::endl;
+				std::cout<<"Calling python callback with index "<<i<<std::endl;
+				callbacks[i]();
 			}
+			else if(done[i])
+				number_done++;
 
 		main_mutex.unlock();
 
@@ -59,16 +64,14 @@ void run()
 
 int create_thread()
 {
-	initialize();
-	PyEval_InitThreads();
-	PyEval_ReleaseLock();
-	assert(PyEval_ThreadsInitialized());
-	main_thread = std::thread(run);
+	if(!main_thread.joinable())
+		main_thread = std::thread(run);
 	return main_thread.joinable();
 }
 
-int call_after_delay(float time, PyObject* callback)
+int call_after_delay(float time, c_fct_ptr callback)
 {
+	main_mutex.lock();
 	if(!is_running)
 		if(create_thread()<0)
 		{
@@ -76,14 +79,9 @@ int call_after_delay(float time, PyObject* callback)
 			return -1;
 		}
 
-	std::cout<<time<<std::endl;
-	std::cout<<delays.size()<<std::endl;
-	std::cout<<done.size()<<std::endl;
-	main_mutex.lock();
 	delays.push_back(time);
 	done.push_back(false);
-	//callback_index.push_back(callback_index.size());
-	callback_index.push_back(add_callback(callback, 0));
+	callbacks.push_back(std::function<void(void)>(std::bind(callback)));
 	main_mutex.unlock();
 
 	return 0;
@@ -92,14 +90,20 @@ int call_after_delay(float time, PyObject* callback)
 int empty_queue_callback()
 {
 	main_mutex.lock();
-	int s = callbacks_queue_size();
+	size_t s = number_done;
 	main_mutex.unlock();
-	if(s<0)
-		return s;
-	else if(!s)
-		return 1;
-	else
+	if(s<done.size())
 		return 0;
+	else
+		return 1;
+}
+
+int done_callbacks()
+{
+	main_mutex.lock();
+	size_t r = number_done;
+	main_mutex.unlock();
+	return r;
 }
 
 void join()
