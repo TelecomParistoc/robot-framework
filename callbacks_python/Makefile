@@ -39,8 +39,8 @@ tests/%.so: tests/%.cpp
 	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 tests: CC=g++
-tests: LDFLAGS=-lpython2.7 -shared
-tests: CFLAGS=-O2 -std=c++11 -I/usr/include/python2.7 -Wall -Werror -fpic
+tests: LDFLAGS=-shared
+tests: CFLAGS=-O2 -std=c++11 -Wall -Werror -fpic
 tests: $(TESTS) $(TESTS_PYTHON)
 
 $(TESTS_PYTHON):

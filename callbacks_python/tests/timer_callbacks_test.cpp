@@ -64,12 +64,14 @@ void run()
 
 int create_thread()
 {
-	main_thread = std::thread(run);
+	if(!main_thread.joinable())
+		main_thread = std::thread(run);
 	return main_thread.joinable();
 }
 
 int call_after_delay(float time, c_fct_ptr callback)
 {
+	main_mutex.lock();
 	if(!is_running)
 		if(create_thread()<0)
 		{
@@ -77,7 +79,6 @@ int call_after_delay(float time, c_fct_ptr callback)
 			return -1;
 		}
 
-	main_mutex.lock();
 	delays.push_back(time);
 	done.push_back(false);
 	callbacks.push_back(std::function<void(void)>(std::bind(callback)));
