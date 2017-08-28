@@ -11,7 +11,7 @@ typedef std::function<void()> _callback;
 class GPIO
 {
     public:
-        GPIO(int id, int initial_value);
+        GPIO(int id=-1, int initial_value=-1);
 
         void add_attached_on_gpio_change(const _callback& callback, bool one_shot = false);
         void add_attached_on_gpio_down(const _callback& callback, bool one_shot = false);

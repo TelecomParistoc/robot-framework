@@ -8,7 +8,7 @@ LOCAL_PYTHON = /usr/local/lib/python2.7/dist-packages/gpio.py
 
 CC = g++
 CFLAGS = -O2 -std=c++11 -Wall -Werror -fpic
-LDFLAGS = -shared
+LDFLAGS = -lwiringPi -shared
 
 .PHONY: all test clean
 

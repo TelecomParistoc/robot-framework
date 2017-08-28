@@ -1,12 +1,11 @@
 #include <functional>
 #include <unistd.h>
 #include <iostream>
-#include <vector>
 #include <thread>
-#include <chrono>
 #include <mutex>
 #include <map>
 
+#include "wiringPi.h"
 #include "gpio.h"
 
 
@@ -47,12 +46,10 @@ void run()
 {
 	std::cout<<"[+] Starting GPIO thread"<<std::endl;
 
-	auto start = std::chrono::high_resolution_clock::now();
-
 	is_running = true;
 	while(is_running)
 	{
-		main_mutex.lock();
+                main_mutex.lock();
 
         for(auto it : gpios)
         {
@@ -86,13 +83,15 @@ int create_thread()
 int create_thread_if_not_running()
 {
     if(!is_running)
-		if(create_thread()<0)
-		{
-			std::cerr<<"[-] Unable to create thread"<<std::endl;
-			return -1;
-		}
+    {
+        if(create_thread()<0)
+        {
+            std::cerr<<"[-] Unable to create thread"<<std::endl;
+            return -1;
+        }
         else
             return 1;
+    }
 
     return 0;
 }
@@ -106,7 +105,7 @@ void set_pin_state(int id, int state)
 void assign_callback_on_gpio_change(int id, c_fct_ptr callback, bool one_shot)
 {
     main_mutex.lock();
-	create_thread_if_not_running();
+    create_thread_if_not_running();
 
     if(!gpios.count(id))
         gpios[id] = GPIO(id, digitalRead(id));
@@ -119,7 +118,7 @@ void assign_callback_on_gpio_change(int id, c_fct_ptr callback, bool one_shot)
 void assign_callback_on_gpio_down(int id, c_fct_ptr callback, bool one_shot)
 {
     main_mutex.lock();
-	create_thread_if_not_running();
+    create_thread_if_not_running();
 
     if(!gpios.count(id))
         gpios[id] = GPIO(id, digitalRead(id));
@@ -132,7 +131,7 @@ void assign_callback_on_gpio_down(int id, c_fct_ptr callback, bool one_shot)
 void assign_callback_on_gpio_up(int id, c_fct_ptr callback, bool one_shot)
 {
     main_mutex.lock();
-	create_thread_if_not_running();
+    create_thread_if_not_running();
 
     if(!gpios.count(id))
         gpios[id] = GPIO(id, digitalRead(id));
@@ -152,7 +151,7 @@ void remove_callbacks_on_gpio_change(int id)
         return;
     }
 
-    gpios[id].remove_callbacks_on_gpio_change();
+    gpios[id].clean_on_gpio_change();
     main_mutex.unlock();
 }
 
@@ -166,7 +165,7 @@ void remove_callbacks_on_gpio_down(int id)
         return;
     }
 
-    gpios[id].remove_callbacks_on_gpio_down();
+    gpios[id].clean_on_gpio_down();
     main_mutex.unlock();
 }
 
@@ -180,7 +179,7 @@ void remove_callbacks_on_gpio_up(int id)
         return;
     }
 
-    gpios[id].remove_callbacks_on_gpio_up();
+    gpios[id].clean_on_gpio_up();
     main_mutex.unlock();
 }
 
