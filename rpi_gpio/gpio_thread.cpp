@@ -28,6 +28,7 @@ extern "C" {
     void remove_callbacks_on_gpio(int id);
     void remove_all_callback();
 
+    void init();
     void join();
 
 #ifdef __cplusplus
@@ -202,6 +203,11 @@ void remove_all_callback()
     main_mutex.lock();
     gpios.clear();
     main_mutex.unlock();
+}
+
+void init()
+{
+    wiringPiSetupGpio();
 }
 
 void join()
