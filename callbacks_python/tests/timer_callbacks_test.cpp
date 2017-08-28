@@ -64,9 +64,7 @@ void run()
 
 int create_thread()
 {
-	//PyEval_InitThreads();
 	main_thread = std::thread(run);
-	//PyEval_SaveThread();
 	return main_thread.joinable();
 }
 
@@ -79,22 +77,11 @@ int call_after_delay(float time, c_fct_ptr callback)
 			return -1;
 		}
 
-	std::cout<<time<<std::endl;
-	std::cout<<delays.size()<<std::endl;
-	std::cout<<done.size()<<std::endl;
 	main_mutex.lock();
 	delays.push_back(time);
 	done.push_back(false);
-	callback();
 	callbacks.push_back(std::function<void(void)>(std::bind(callback)));
-	callbacks[callbacks.size()-1]();
-	std::cout<<"ok "<<std::hex<<callback<<std::endl;
-	printf("%p\n", callback);
 	main_mutex.unlock();
-
-	for(int i=0; i<80; i++)
-		printf("%x ", *((char *)(callback)+i));
-	std::cout<<std::endl;
 
 	return 0;
 }

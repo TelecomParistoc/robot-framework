@@ -6,9 +6,6 @@ import time
 def common_callback(index, time):
 	print "Callback with index "+str(index)+" reached after a "+str(time)+" seconds delay"
 
-def nulle():
-	print "NUL"
-
 func = []
 def timer_launch(time, index, lib):
 	func.append(ctypes.CFUNCTYPE(None)(lambda: common_callback(index, time)))
