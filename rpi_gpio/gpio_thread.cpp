@@ -94,7 +94,7 @@ int create_thread_if_not_running()
     {
         if(create_thread()<0)
         {
-            std::cerr<<"[-] Unable to create thread"<<std::endl;
+            std::cerr<<"[-] Unable to create thread for GPIO"<<std::endl;
             return -1;
         }
         else
@@ -241,9 +241,9 @@ void init()
 
 void join()
 {
-	std::cout<<"[...] Stopping callback thread"<<std::endl;
+	std::cout<<"[...] Stopping GPIO thread"<<std::endl;
 	is_running = false;
 	if(main_thread.joinable())
 		main_thread.join();
-	std::cout<<"[+] Thread joint"<<std::endl;
+	std::cout<<"[+] GPIO thread joined"<<std::endl;
 }

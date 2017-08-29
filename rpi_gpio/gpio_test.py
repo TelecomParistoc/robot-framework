@@ -17,42 +17,56 @@ def print_something(index, text):
 
 gpio.assign_callback_on_gpio_down(pin_index, lambda: print_something(pin_index, "down"))
 
+print ""
 gpio.digital_write(pin_index, 1)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 gpio.digital_write(pin_index, 0)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 
 gpio.assign_callback_on_gpio_change(pin_index, lambda: print_something(pin_index, "changed"))
 
+print ""
 gpio.digital_write(pin_index, 1)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 gpio.digital_write(pin_index, 0)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 
-gpio.assign_callback_on_gpio_change(pin_index, lambda: print_something(pin_index, "changed (one shot, should disappear after beeing triggered)"), True) # the last "True" argument is for one shot callback
+gpio.assign_callback_on_gpio_change(pin_index, lambda: print_something(pin_index, "changed (one shot, disappear after beeing triggered)"), True) # the last "True" argument is for one shot callback
 gpio.assign_callback_on_gpio_up(pin_index, lambda: print_something(pin_index, "up"))
 
+print ""
 gpio.digital_write(pin_index, 1)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 gpio.digital_write(pin_index, 0)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 
 gpio.remove_callbacks_on_gpio_change(pin_index)
 
+print ""
 gpio.digital_write(pin_index, 1)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 gpio.digital_write(pin_index, 0)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 
 gpio.remove_callbacks_on_gpio(pin_index)
 
-print "All callbacks are removed, it should be printed anything from them now"
+print "All callbacks are removed, it should not be printed anything from them now"
 
+print ""
 gpio.digital_write(pin_index, 1)
 time.sleep(0.5)
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 gpio.digital_write(pin_index, 0)
 time.sleep(0.5)
-
+print "Read "+str(gpio.digital_read(pin_index))+" on pin "+str(pin_index)
 gpio.set_pin_mode(pin_index, gpio.INPUT)
 
 gpio.join() # this is necessary to properly close the callback C thread
