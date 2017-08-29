@@ -15,7 +15,7 @@ def manage_time_elapsed(robot):
 
 
 
-def Wait_Object:
+class Wait_Object:
 
     def __init__(self, callback = None, inter_delay = 0.05):
         self.callback = callback
