@@ -22,8 +22,6 @@ extern "C" {
 
     int pin_state(int pin);
     void set_pin_state(int pin, int state);
-    unsigned int pin_read(int pin);
-    void pin_write(int pin, int val);
     int analog_read(int pin);
     void analog_write(int pin, int val);
     void pwm_write(int pin, int val);
@@ -62,9 +60,9 @@ void run()
 	{
         main_mutex.lock();
 
-        for(std::map<int, GPIO>::iterator it : gpios)
+        for(std::map<int, GPIO>::iterator it = gpios.begin(); it != gpios.end(); it++)
         {
-            int current = digitalRead(it.first);
+            int current = digitalRead(it->first);
             if(current != it->second.get_value())
             {
                 it->second.set_value(current);
@@ -123,12 +121,6 @@ int pin_state(int pin)
 
 void set_pin_state(int pin, int state)
 {return digitalWrite(pin, state);}
-
-unsigned int pin_read(int pin)
-{return digitalRead8(pin);}
-
-void pin_write(int pin, int val)
-{return digitalWrite8(pin, val);}
 
 int analog_read(int pin)
 {return analogRead(pin);}

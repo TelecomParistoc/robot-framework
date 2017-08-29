@@ -8,7 +8,7 @@ lib_gpio = ctypes.cdll.LoadLibrary(LIBNAME)
 
 
 INPUT = 0
-OUPUT = 1
+OUTPUT = 1
 PWM_OUTPUT = 2
 modes = [INPUT, OUTPUT, PWM_OUTPUT]
 
@@ -44,16 +44,6 @@ def digital_write(id, val):
     assert (isinstance(val, int))
 
     lib_gpio.set_pin_state(ctypes.c_int(id), ctypes.c_int(val))
-
-def digital_read_byte(id):
-    assert (isinstance(id, int))
-    return int(lib_gpio.pin_read(ctypes.c_int(id)))
-
-def digital_write_byte(id, val):
-    assert (isinstance(id, int))
-    assert (isinstance(val, int))
-
-    lib_gpio.pin_write(ctypes.c_int(id), ctypes.c_int(val))
 
 def analog_read(id):
     assert (isinstance(id, int))
