@@ -15,17 +15,27 @@ typedef void (*c_fct_ptr)(void);
 extern "C" {
 #endif
 
-    int pin_state(int id);
-    void set_pin_state(int id, int state);
+    int wpi_to_gpio(int wpi);
 
-    void assign_callback_on_gpio_change(int id, c_fct_ptr callback, bool one_shot = false);
-    void assign_callback_on_gpio_down(int id, c_fct_ptr callback, bool one_shot = false);
-    void assign_callback_on_gpio_up(int id, c_fct_ptr callback, bool one_shot = false);
+    void set_pin_mode(int pin, int mode);
+    void set_pull_up_down(int pin, int mode);
 
-    void remove_callbacks_on_gpio_change(int id);
-    void remove_callbacks_on_gpio_down(int id);
-    void remove_callbacks_on_gpio_up(int id);
-    void remove_callbacks_on_gpio(int id);
+    int pin_state(int pin);
+    void set_pin_state(int pin, int state);
+    unsigned int pin_read(int pin);
+    void pin_write(int pin, int val);
+    int analog_read(int pin);
+    void analog_write(int pin, int val);
+    void pwm_write(int pin, int val);
+
+    void assign_callback_on_gpio_change(int pin, c_fct_ptr callback, bool one_shot = false);
+    void assign_callback_on_gpio_down(int pin, c_fct_ptr callback, bool one_shot = false);
+    void assign_callback_on_gpio_up(int pin, c_fct_ptr callback, bool one_shot = false);
+
+    void remove_callbacks_on_gpio_change(int pin);
+    void remove_callbacks_on_gpio_down(int pin);
+    void remove_callbacks_on_gpio_up(int pin);
+    void remove_callbacks_on_gpio(int pin);
     void remove_all_callback();
 
     void init();
@@ -57,9 +67,7 @@ void run()
             int current = digitalRead(it.first);
             if(current != it.second.get_value())
             {
-                std::cout<<"[+] Value of gpio "<<it.first<<" has changed to "<<current<<std::endl;
                 it.second.set_value(current);
-                std::cout<<"[+] Now value is "<<it.second.get_value()<<std::endl;
                 it.second.call_on_gpio_change();
                 if(current)
                     it.second.call_on_gpio_up();
@@ -98,104 +106,132 @@ int create_thread_if_not_running()
     return 0;
 }
 
-int pin_state(int id)
-{return digitalRead(id);}
 
-void set_pin_state(int id, int state)
-{return digitalWrite(id, state);}
+int wpi_to_gpio(int wpi)
+{return wpiPinToGpio(wpi);}
 
-void assign_callback_on_gpio_change(int id, c_fct_ptr callback, bool one_shot)
+
+void set_pin_mode(int pin, int mode)
+{return pinMode(pin, mode);}
+
+void set_pull_up_down(int pin, int mode)
+{return pullUpDnControl(pin, mode);}
+
+
+int pin_state(int pin)
+{return digitalRead(pin);}
+
+void set_pin_state(int pin, int state)
+{return digitalWrite(pin, state);}
+
+unsigned int pin_read(int pin)
+{return digitalRead8(pin);}
+
+void pin_write(int pin, int val)
+{return digitalWrite8(pin, val);}
+
+int analog_read(int pin)
+{return analogRead(pin);}
+
+void analog_write(int pin, int val)
+{return analogWrite(pin, val);}
+
+void pwm_write(int pin, int val)
+{return pwmWrite(pin, val);}
+
+
+void assign_callback_on_gpio_change(int pin, c_fct_ptr callback, bool one_shot)
 {
     main_mutex.lock();
     create_thread_if_not_running();
 
-    if(!gpios.count(id))
-        gpios[id] = GPIO(id, digitalRead(id));
+    if(!gpios.count(pin))
+        gpios[pin] = GPIO(pin, digitalRead(pin));
 
-    gpios[id].add_attached_on_gpio_change(_callback(callback), one_shot);
+    gpios[pin].add_attached_on_gpio_change(_callback(callback), one_shot);
 
     main_mutex.unlock();
 }
 
-void assign_callback_on_gpio_down(int id, c_fct_ptr callback, bool one_shot)
+void assign_callback_on_gpio_down(int pin, c_fct_ptr callback, bool one_shot)
 {
     main_mutex.lock();
     create_thread_if_not_running();
 
-    if(!gpios.count(id))
-        gpios[id] = GPIO(id, digitalRead(id));
+    if(!gpios.count(pin))
+        gpios[pin] = GPIO(pin, digitalRead(pin));
 
-    gpios[id].add_attached_on_gpio_down(_callback(callback), one_shot);
+    gpios[pin].add_attached_on_gpio_down(_callback(callback), one_shot);
 
     main_mutex.unlock();
 }
 
-void assign_callback_on_gpio_up(int id, c_fct_ptr callback, bool one_shot)
+void assign_callback_on_gpio_up(int pin, c_fct_ptr callback, bool one_shot)
 {
     main_mutex.lock();
     create_thread_if_not_running();
 
-    if(!gpios.count(id))
-        gpios[id] = GPIO(id, digitalRead(id));
+    if(!gpios.count(pin))
+        gpios[pin] = GPIO(pin, digitalRead(pin));
 
-    gpios[id].add_attached_on_gpio_up(_callback(callback), one_shot);
+    gpios[pin].add_attached_on_gpio_up(_callback(callback), one_shot);
 
     main_mutex.unlock();
 }
 
-void remove_callbacks_on_gpio_change(int id)
+void remove_callbacks_on_gpio_change(int pin)
 {
     main_mutex.lock();
 
-    if(!gpios.count(id))
+    if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (id "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
         return;
     }
 
-    gpios[id].clean_on_gpio_change();
+    gpios[pin].clean_on_gpio_change();
     main_mutex.unlock();
 }
 
-void remove_callbacks_on_gpio_down(int id)
+void remove_callbacks_on_gpio_down(int pin)
 {
     main_mutex.lock();
 
-    if(!gpios.count(id))
+    if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (id "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
         return;
     }
 
-    gpios[id].clean_on_gpio_down();
+    gpios[pin].clean_on_gpio_down();
     main_mutex.unlock();
 }
 
-void remove_callbacks_on_gpio_up(int id)
+void remove_callbacks_on_gpio_up(int pin)
 {
     main_mutex.lock();
 
-    if(!gpios.count(id))
+    if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (id "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
         return;
     }
 
-    gpios[id].clean_on_gpio_up();
+    gpios[pin].clean_on_gpio_up();
     main_mutex.unlock();
 }
 
-void remove_callbacks_on_gpio(int id)
+void remove_callbacks_on_gpio(int pin)
 {
     main_mutex.lock();
 
-    if(!gpios.count(id))
+    if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (id "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
         return;
     }
 
-    gpios[id].clean_callbacks();
+    gpios[pin].clean_callbacks();
     main_mutex.unlock();
 }
 

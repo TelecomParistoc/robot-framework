@@ -12,8 +12,7 @@ def common_callback(index, time):
 	print "Callback with index "+str(index)+" reached after a "+str(time)+" seconds delay"
 
 def timer_launch(time, index, lib):
-	t = encapsulate_callback(lambda: common_callback(index, time), True)
-	return lib.call_after_delay(ctypes.c_float(time), t)
+	return lib.call_after_delay(ctypes.c_float(time), encapsulate_callback(lambda: common_callback(index, time), True))
 
 #lib = ctypes.cdll.LoadLibrary("/home/pi/robot-framework/callbacks_python/tests/timer_callbacks_test.so")
 lib = ctypes.cdll.LoadLibrary("./timer_callbacks_test.so")

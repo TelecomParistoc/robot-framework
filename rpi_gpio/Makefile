@@ -4,17 +4,15 @@ PREFIX = /usr/local/lib/
 
 PYTHON_EXE = gpio_test.py
 PYTHON_BINDING = python_binding.py
-PYTHON_UTILS = gpio_lib_path
 PYTHON_PREFIX = /usr/local/lib/python2.7/dist-packages/
 LOCAL_PYTHON = gpio.py
-LOCAL_PYTHON_UTILS =
 
 CC = g++
 CFLAGS = -O2 -std=c++11 -Wall -Werror -fpic
 LDFLAGS = -lwiringPi -shared
 
-.PHONY: all test clean
 
+.PHONY: all test install clean
 
 all: $(TARGET)
 
