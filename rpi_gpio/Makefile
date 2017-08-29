@@ -26,7 +26,7 @@ test: $(TARGET)
 
 install: $(TARGET)
 	cp $(PYTHON_BINDING) $(PYTHON_PREFIX)$(LOCAL_PYTHON)
-	sudo python -c 'f = open("$(PYTHON_PREFIX)$(LOCAL_PYTHON)", "r+"); content = f.read().replace("LIBNAME", "'$(PREFIX)$(TARGET)'"); f.write(content)';
+	sudo python -c 'content = open("$(PYTHON_PREFIX)$(LOCAL_PYTHON)", "rb").read().replace("LIBNAME", "\"$(PREFIX)$(TARGET)\""); open("$(PYTHON_PREFIX)$(LOCAL_PYTHON)", "w+").write(content)';
 	mkdir -p $(PREFIX)
 	cp $(TARGET) $(PREFIX)
 	chmod 0755 $(PREFIX)/$(TARGET)
