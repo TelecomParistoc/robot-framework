@@ -9,7 +9,7 @@ gpio.init()
 pin_index = gpio.gpio_index_of_wpi_pin(5)
 print "GPIO 5 corresponds to BCM index "+str(pin_index)
 
-gpio.digital_write(pin_index, gpio.OUTPUT)
+gpio.set_pin_mode(pin_index, gpio.OUTPUT)
 
 
 def print_something(index, text):
