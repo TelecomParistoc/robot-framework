@@ -297,6 +297,9 @@ class Robot:
                 time.sleep(0.05)
                 self.sequence_mutex.acquire()
 
+        if not self.started:
+            self.cur_sequence = ""
+
         if self.debug:
             if base == "":
                 if self.cur_sequence == '':
