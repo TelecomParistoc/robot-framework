@@ -286,13 +286,13 @@ class Robot:
                 print("[...] Waiting for root sequence to finish")
             else:
                 print("[...] Waiting for sequence "+base+" to finish")
-        while ((self.cur_sequence == base and base != "") and not until_the_end) or (self.cur_sequence != '' and until_the_end):
+        while (((self.cur_sequence == base and base != "") and not until_the_end) or (self.cur_sequence != '' and until_the_end)) and self.is_running:
             self.sequence_mutex.release()
             time.sleep(0.01)
             self.sequence_mutex.acquire()
 
         if self.cur_sequence == "" and wait_until_the_end_of_root_sequence:
-            while self.cur_sequence == "" and (len(self.sequences[""])>1 or len(self.sequences[""][0])>=1):
+            while (self.cur_sequence == "" and (len(self.sequences[""])>1 or len(self.sequences[""][0])>=1)) and self.is_running:
                 self.sequence_mutex.release()
                 time.sleep(0.05)
                 self.sequence_mutex.acquire()
