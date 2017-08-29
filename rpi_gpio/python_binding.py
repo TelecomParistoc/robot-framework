@@ -4,7 +4,7 @@
 import ctypes
 from encapsulate_callback import encapsulate_callback
 
-lib_gpio = ctypes.cdll.LoadLibrary(open("lib_path").read().split('\n')[0])
+lib_gpio = ctypes.cdll.LoadLibrary(LIBNAME)
 
 
 def get_pin_state(id):
