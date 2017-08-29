@@ -104,9 +104,7 @@ void GPIO::call_on_gpio_up()
 
 
 void GPIO::set_value(int val)
-{
-    _value = val;
-}
+{_value = val;}
 
 int GPIO::get_id() const
 {return _id;}

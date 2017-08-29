@@ -50,15 +50,16 @@ void run()
 	is_running = true;
 	while(is_running)
 	{
-                main_mutex.lock();
+        main_mutex.lock();
 
-        for(auto it : gpios)
+        for(std::map<int, GPIO>::iterator it : gpios)
         {
             int current = digitalRead(it.first);
             if(current != it.second.get_value())
             {
                 std::cout<<"[+] Value of gpio "<<it.first<<" has changed to "<<current<<std::endl;
                 it.second.set_value(current);
+                std::cout<<"[+] Now value is "<<it.second.get_value()<<std::endl;
                 it.second.call_on_gpio_change();
                 if(current)
                     it.second.call_on_gpio_up();
