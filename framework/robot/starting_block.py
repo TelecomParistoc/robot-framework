@@ -89,14 +89,14 @@ def add_jack_and_delay(robot, delay, start_waiting_jack = True):
     time_elapsed(5, lambda: manage_time_elapsed(robot))
 
     wait_object = Wait_Object()
-    robot.add_method(lambda: wait_object.stop(), 'start')
+    robot.add_method(lambda self: wait_object.stop(), 'start')
 
     robot.add_sequence('loop_before_start')
     robot.add_parallel((lambda u: wait_object.set_callback(callback=u), True))
     robot.wait()
     robot.sequence_done()
 
-    robot.add_method(lambda: robot.start_sequence('loop_before_start'), 'wait_for_jack_pulled')
+    robot.add_method(lambda self: robot.start_sequence('loop_before_start'), 'wait_for_jack_pulled')
 
     if start_waiting_jack:
         robot.wait_for_jack_pulled()

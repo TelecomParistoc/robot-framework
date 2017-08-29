@@ -286,13 +286,13 @@ class Robot:
                 print("[...] Waiting for root sequence to finish")
             else:
                 print("[...] Waiting for sequence "+base+" to finish")
-        while (((self.cur_sequence == base and base != "") and not until_the_end) or (self.cur_sequence != '' and until_the_end)) and self.is_running:
+        while (((self.cur_sequence == base and base != "") and not until_the_end) or (self.cur_sequence != '' and until_the_end)) and self.started:
             self.sequence_mutex.release()
             time.sleep(0.01)
             self.sequence_mutex.acquire()
 
         if self.cur_sequence == "" and wait_until_the_end_of_root_sequence:
-            while (self.cur_sequence == "" and (len(self.sequences[""])>1 or len(self.sequences[""][0])>=1)) and self.is_running:
+            while (self.cur_sequence == "" and (len(self.sequences[""])>1 or len(self.sequences[""][0])>=1)) and self.started:
                 self.sequence_mutex.release()
                 time.sleep(0.05)
                 self.sequence_mutex.acquire()
@@ -397,7 +397,7 @@ class Robot:
 
                 #print(self.cur_sequence, self.cur_parallel, self.sequences[self.cur_sequence], self.delays[self.cur_sequence], self.expected_callbacks[self.cur_sequence], self.sequence_queue)
                 if self.cur_sequence == "" and len(self.sequences[""]) <= 1 and len(self.sequences[""][0]) == 0:
-                    print("[...] No action in root sequence, doing nothing")
+                    pass #print("[...] No action in root sequence, doing nothing")
                 else:
                     deltime = time.time()-prev_time
                     #print self.cur_sequence, self.cur_parallel, len(self.delays), len(self.delays[self.cur_sequence]), self.received_callbacks, self.expected_callbacks[self.cur_sequence]
