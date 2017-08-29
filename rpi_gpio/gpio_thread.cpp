@@ -65,14 +65,14 @@ void run()
         for(std::map<int, GPIO>::iterator it : gpios)
         {
             int current = digitalRead(it.first);
-            if(current != it.second.get_value())
+            if(current != it->second.get_value())
             {
-                it.second.set_value(current);
-                it.second.call_on_gpio_change();
+                it->second.set_value(current);
+                it->second.call_on_gpio_change();
                 if(current)
-                    it.second.call_on_gpio_up();
+                    it->second.call_on_gpio_up();
                 else
-                    it.second.call_on_gpio_down();
+                    it->second.call_on_gpio_down();
             }
         }
 
@@ -185,7 +185,7 @@ void remove_callbacks_on_gpio_change(int pin)
 
     if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<pin<<")"<<std::endl;
         return;
     }
 
@@ -199,7 +199,7 @@ void remove_callbacks_on_gpio_down(int pin)
 
     if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<pin<<")"<<std::endl;
         return;
     }
 
@@ -213,7 +213,7 @@ void remove_callbacks_on_gpio_up(int pin)
 
     if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<pin<<")"<<std::endl;
         return;
     }
 
@@ -227,7 +227,7 @@ void remove_callbacks_on_gpio(int pin)
 
     if(!gpios.count(pin))
     {
-        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<id<<")"<<std::endl;
+        std::cerr<<"[-] Unable to remove callbacks of inexisting gpio (pin "<<pin<<")"<<std::endl;
         return;
     }
 
