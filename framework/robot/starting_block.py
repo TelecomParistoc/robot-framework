@@ -48,12 +48,6 @@ class Wait_Object:
             self.thread = Thread(target=self.run).start()
 
 
-transitions = {'waiting':{'push':('ready', None)},
-                'ready':{'pull':('started', start)},
-                'started':{'push':('abort', abort)}}
-
-cur_state = 'waiting'
-
 
 def manage_jack(robot):
 
@@ -64,6 +58,12 @@ def manage_jack(robot):
     def abort():
         print "[-] Stopping robot because of jack"
         robot.stop()
+
+    transitions = {'waiting':{'push':('ready', None)},
+                    'ready':{'pull':('started', start)},
+                    'started':{'push':('abort', abort)}}
+
+    cur_state = 'waiting'
 
     def manage_jack_closure(pulled):
         if pulled:
