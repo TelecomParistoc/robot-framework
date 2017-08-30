@@ -15,27 +15,27 @@ if __name__ == "__main__":
 
     robot = init()
 
-    manage_jack = add_jack_and_delay(robot, 100, False)
+    manage_jack = add_jack_and_delay(robot, 100)
 
     gpio.assign_callback_on_gpio_down(24, lambda: manage_jack(False))
     gpio.assign_callback_on_gpio_up(24, lambda: manage_jack(True))
+
 
     # all that follows is for example purpose (no jack management here)
 
     def execute_seq(robot_callback, wait_object, robot):
         print "[+] Executing the only sequence of this test !"
         wait_object.set_callback(robot_callback)
-        start_and_wait_test_seq(robot)
+        start_seq(robot)
 
     def stop_and_reset_wait_object(w):
         w.stop()
         w.join()
         w.reset()
 
-    def start_and_wait_test_seq(robot):
+    def start_seq(robot):
         print "[+] Adding the test sequence to queue"
         robot.start_sequence('test_seq')
-        #robot.wait_sequence()
 
     for_test_purpose_pin = gpio.gpio_index_of_wpi_pin(4)
     gpio.set_pin_mode(for_test_purpose_pin, gpio.OUTPUT)
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     robot.wait()
     robot.sequence_done()
 
-    robot.wait_sequence()
+    robot.wait_sequence() # We wait for jack beeing pushed/pulled
     start_and_wait_test_seq(robot)
     robot.wait_sequence()
 
