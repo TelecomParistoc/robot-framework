@@ -23,7 +23,8 @@ class Wait_Object:
         self.callback = callback
         self.delay = inter_delay
         self.stopped = False
-        self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t)).start()
+        self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t))
+        self.thread.start()
 
     def set_callback(self, callback):
         self.callback = callback
@@ -32,8 +33,6 @@ class Wait_Object:
         if not self.stopped:
             return True
         else:
-            print "Callback calling"
-            print self.callback
             if callable(self.callback):
                 self.callback()
 
@@ -43,17 +42,14 @@ class Wait_Object:
         self.stopped = True
 
     def join(self):
-        print "None ?"
-        print self.thread
         if self.thread is not None:
-            self.thread.stop()
             self.thread.join()
 
     def reset(self):
         if self.stopped:
             self.stopped = False
-            self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t)).start()
-
+            self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t))
+            self.thread.start()
 
 class manage_jack:
 

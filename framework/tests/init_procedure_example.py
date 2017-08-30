@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     robot = init()
 
-    manage_jack = add_jack_and_delay(robot, 100)
+    manage_jack = add_jack_and_delay(robot, 100, False)
 
     gpio.assign_callback_on_gpio_down(24, lambda: manage_jack(False))
     gpio.assign_callback_on_gpio_up(24, lambda: manage_jack(True))
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     def start_and_wait_test_seq(robot):
         print "[+] Adding the test sequence to queue"
         robot.start_sequence('test_seq')
-        robot.wait_sequence()
+        #robot.wait_sequence()
 
     for_test_purpose_pin = gpio.gpio_index_of_wpi_pin(4)
     gpio.set_pin_mode(for_test_purpose_pin, gpio.OUTPUT)
@@ -48,7 +48,10 @@ if __name__ == "__main__":
     robot.wait()
     robot.sequence_done()
 
+    robot.wait_sequence()
     start_and_wait_test_seq(robot)
+    robot.wait_sequence()
 
+    robot.stop()
     gpio.join()
     Thread_Easy_Stop.stop_all_threads()
