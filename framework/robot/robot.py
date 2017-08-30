@@ -204,6 +204,10 @@ class Robot:
 
 
     def start_sequence(self, name, step=0):
+        if not self.started:
+            print("[-] Sequence not started because thread is finished, please construct another instance")
+            return False
+
         self.sequence_mutex.acquire()
 
         if name is None or name == "":
@@ -235,13 +239,14 @@ class Robot:
 
         self.sequence_mutex.release()
 
-        if not self.started:
-            self.thread = Thread(target=lambda: self.run()).start()
-
         return True
 
 
     def start_last_used(self, step=0):
+        if not self.started:
+            print("[-] Last sequence not started because thread is finished, please construct another instance")
+            return False
+
         self.sequence_mutex.acquire()
 
         if self.last_sequence == "":
@@ -267,9 +272,6 @@ class Robot:
             self.sequence_queue.append((self.last_sequence, step))
 
         self.sequence_mutex.release()
-
-        if not self.started:
-            self.thread = Thread(target=lambda: self.run()).start()
 
         return True
 
@@ -408,7 +410,6 @@ class Robot:
                     deltime = time.time()-prev_time
                     #print self.cur_sequence, self.cur_parallel, len(self.delays), len(self.delays[self.cur_sequence]), self.received_callbacks, self.expected_callbacks[self.cur_sequence]
                     if (self.delays[self.cur_sequence][self.cur_parallel]>0 and deltime>self.delays[self.cur_sequence][self.cur_parallel]) or self.received_callbacks >= self.expected_callbacks[self.cur_sequence][self.cur_parallel]:
-                        print "bad thing ..."
                         if self.cur_sequence == "":
                             if self.cur_parallel != 0 and self.debug:
                                 print("[-] Cur parallel is not null whereas we are in root sequence, should not happen")
@@ -447,13 +448,11 @@ class Robot:
                                 self.expected_callbacks[""] = [0]
 
                         else:
-                            print "CUR PARRALLEL : "+str(self.cur_parallel)
                             self.cur_parallel += 1
                             self.received_callbacks = 0
                             prev = self.cur_sequence
                             if self.cur_parallel+1 >= len(self.delays[self.cur_sequence]):
                                 prev_parallel = self.cur_parallel
-                                print "TOO MUCH"
                                 if len(self.sequence_queue)>0:
                                     seq = self.sequence_queue[0]
                                     self.cur_sequence, self.cur_parallel = seq
@@ -471,7 +470,6 @@ class Robot:
                                 if self.debug:
                                     print("[+++] Parallel block "+str(prev_parallel)+" done, all actions of sequence "+prev+" has been done, we return to "+seq+" sequence")
                             else:
-                                print "OTHER TYPE"
                                 prev_time = time.time()
                                 self.reset_waited_callbacks_release_acquire_launch_sequence(self.cur_parallel)
                                 if self.debug:
@@ -488,3 +486,6 @@ class Robot:
         self.started = False
         if self.debug:
             print("[++][...] Stopping sequence thread")
+
+    def is_running(self):
+        return self.started
