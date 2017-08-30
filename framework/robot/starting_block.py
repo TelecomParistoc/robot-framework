@@ -1,13 +1,15 @@
-from threading import Thread
+from thread_easy_stop import Thread_Easy_Stop
 import time
 
 
 def time_elapsed(delay, callback):
-    def run():
-        time.sleep(delay)
-        callback()
+    def run_step(t):
+        if t>delay:
+            callback()
+            return False
+        return True
 
-    thread = Thread(target=run).start()
+    thread = Thread_Easy_Stop(callback_in_loop=run_step).start()
 
 def manage_time_elapsed(robot):
     print "[.] End of granted time, stopping robot"
@@ -21,31 +23,31 @@ class Wait_Object:
         self.callback = callback
         self.delay = inter_delay
         self.stop = False
-        self.ended = False
-        self.thread = Thread(target=self.run).start()
+        self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t)).start()
 
     def set_callback(self, callback):
         self.callback = callback
 
-    def run(self):
-        while not self.stop:
-            time.sleep(self.delay)
-        if callable(self.callback):
-            self.callback()
-        self.ended = True
+    def run_step(self, t):
+        if self.stop:
+            return True
+        else:
+            if callable(self.callback):
+                self.callback()
+
+            return False
 
     def stop(self):
         self.stop = True
 
     def join(self):
-        while not self.ended:
-            time.sleep(self.delay)
+        self.thread.stop()
+        self.thread.join()
 
     def reset(self):
         if self.ended:
             self.stop = False
-            self.ended = False
-            self.thread = Thread(target=self.run).start()
+            self.thread = Thread_Easy_Stop(callback_in_loop = lambda t: self.run_step(t)).start()
 
 
 

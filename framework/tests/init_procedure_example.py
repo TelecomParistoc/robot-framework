@@ -1,4 +1,5 @@
 from ..robot.starting_block import add_jack_and_delay, Wait_Object
+from ..robot.thread_easy_stop import Thread_Easy_Stop
 from ..local_robot.big_robot import *
 import gpio
 import time
@@ -13,7 +14,7 @@ if __name__ == "__main__":
     gpio.set_pin_mode(jack_pin, gpio.INPUT)
 
     robot = init()
- 
+
     manage_jack = add_jack_and_delay(robot, 10)
     gpio.assign_callback_on_gpio_down(jack_pin, lambda: manage_jack(False))
     gpio.assign_callback_on_gpio_up(jack_pin, lambda: manage_jack(True))
@@ -52,3 +53,4 @@ if __name__ == "__main__":
     robot.stop()
 
     gpio.join()
+    Thread_Easy_Stop.stop_all_threads()
