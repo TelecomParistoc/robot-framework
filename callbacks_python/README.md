@@ -7,4 +7,4 @@ Pour tester : *make test*
 Pour installer : *sudo make install*
 
 **Important !**
-On notera la présence du package encapsulate_callback dont l'utilisation est nécessaire pour encapsuler des callback python dans un objet permettant de les utiliser en C.
+On notera la présence du module encapsulate_callback dont l'utilisation est nécessaire pour encapsuler des callback python dans un objet permettant de les utiliser en C.
