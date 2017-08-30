@@ -49,44 +49,45 @@ class Wait_Object:
 
 
 
-def manage_jack(robot):
+class manage_jack:
 
-    def start():
+    def start(self):
         print "[+] Actionning robot"
-        robot.start()
+        self.robot.start()
 
     def abort():
         print "[-] Stopping robot because of jack"
-        robot.stop()
+        self.robot.stop()
 
-    transitions = {'waiting':{'push':('ready', None)},
-                    'ready':{'pull':('started', start)},
-                    'started':{'push':('abort', abort)}}
+    def __init__(self, robot):
+        self.transitions = {'waiting':{'push':('ready', None)},
+                            'ready':{'pull':('started', self.start)},
+                            'started':{'push':('abort', self.abort)}}
 
-    cur_state = 'waiting'
+        self.cur_state = 'waiting'
 
-    def manage_jack_closure(pulled):
+        self.robot = robot
+
+    def manage_jack_closure(self, pulled):
         if pulled:
             key = 'pull'
         else:
             key = 'push'
 
-        if cur_state not in transitions:
-            print "[-] Inexisting transition for state "+cur_state
+        if self.cur_state not in self.transitions:
+            print "[-] Inexisting transition for state "+self.cur_state
             return
 
-        if transitions[cur_state][key] is not None:
-            cur_state, callback = transitions[cur_state][key]
+        if key in self.transitions[self.cur_state]:
+            self.cur_state, callback = self.transitions[self.cur_state][key]
             if callback is not None:
                 callback()
-
-    return manage_jack_closure
 
 
 
 
 def add_jack_and_delay(robot, delay, start_waiting_jack = True):
-    time_elapsed(5, lambda: manage_time_elapsed(robot))
+    time_elapsed(delay, lambda: manage_time_elapsed(robot))
 
     wait_object = Wait_Object()
     robot.add_method(lambda self: wait_object.stop(), 'start')
@@ -101,4 +102,4 @@ def add_jack_and_delay(robot, delay, start_waiting_jack = True):
     if start_waiting_jack:
         robot.wait_for_jack_pulled()
 
-    return manage_jack(robot)
+    return lambda pulled: manage_jack(robot).manage_jack_closure(pulled)

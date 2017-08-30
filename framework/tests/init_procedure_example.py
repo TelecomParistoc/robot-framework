@@ -18,8 +18,6 @@ if __name__ == "__main__":
     gpio.assign_callback_on_gpio_down(jack_pin, lambda: manage_jack(False))
     gpio.assign_callback_on_gpio_up(jack_pin, lambda: manage_jack(True))
 
-    robot.wait_sequence()
-
 
     # all that follows is for example purpose (no jack management here)
 
