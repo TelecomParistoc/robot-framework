@@ -3,6 +3,7 @@
 Ce dossier écrêmé présente uniquement un test (en plus du code important) qui montre comment interfacer des callbacks python appelés dans des contexte d'exécution (threads C) différent.
 
 Pour tester : *make test*
+
 Pour installer : *sudo make install*
 
 **Important !**
