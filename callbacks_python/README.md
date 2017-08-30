@@ -1,6 +1,6 @@
 # Callback python
 
-Ce dossier écrêmé présente uniquement un test (en plus du code important) qui montre comment interfacer des callbacks python appelés dans des contexte d'exécution (threads C) différent.
+Ce dossier écrêmé présente uniquement un test (en plus du code important) qui montre comment interfacer des callbacks python appelés dans des contexte d'exécution (threads C) différents.
 
 Pour tester : *make test*
 
