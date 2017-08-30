@@ -455,7 +455,6 @@ class Robot:
                                 prev_parallel = self.cur_parallel
                                 print "TOO MUCH"
                                 if len(self.sequence_queue)>0:
-                                    print "NOW SEQ ", seq
                                     seq = self.sequence_queue[0]
                                     self.cur_sequence, self.cur_parallel = seq
                                     seq = seq[0]
