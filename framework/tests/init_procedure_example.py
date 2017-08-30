@@ -49,7 +49,7 @@ if __name__ == "__main__":
     robot.sequence_done()
 
     robot.wait_sequence() # We wait for jack beeing pushed/pulled
-    start_and_wait_test_seq(robot)
+    start_seq(robot)
     robot.wait_sequence()
 
     robot.stop()
