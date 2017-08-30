@@ -53,7 +53,7 @@ std::thread main_thread;
 
 void run()
 {
-	std::cout<<"[+] Starting GPIO thread"<<std::endl;
+	std::cout<<"[+++] Starting GPIO thread"<<std::endl;
 
 	is_running = true;
 	while(is_running)
@@ -245,5 +245,5 @@ void join()
 	is_running = false;
 	if(main_thread.joinable())
 		main_thread.join();
-	std::cout<<"[+] GPIO thread joined"<<std::endl;
+	std::cout<<"[+++] GPIO thread joined"<<std::endl;
 }
