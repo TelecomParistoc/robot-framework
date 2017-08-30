@@ -26,16 +26,19 @@ Ce dossier contient :
 - **README.md** : Un README (ce même fichier) qui contient tout ce qui est nécessaire pour comprendre le fonctionnement de cette sous partie du robot
 
 ## Installation
+
+Les trois procédures d'installation suivantes sont de plus en plus "complexes" mais permettent à chaque fois une plus grand maîtrise des fichiers utilisés pour la configuration.
+
 ### Procédure d'installation très facile
 
- 1. Changer le chemin du fichier de script utilisé par le robot dans **program_and_commands.config**.
+ 1. Changer le chemin du fichier de script utilisé par le robot et les commandes d'inialisation/vérification de l'état situés dans **program_and_commands.config**.
  2. Exécuter ```$ make install```
 
 ### Procédure d'installation facile
 
- 1. Pour changer le chemin utilisé dans la boucle, modifier le contenu du fichier **/var/robot_config/program_path**.
- 2. Pour changer les commandes utilisées pour initialiser les gpio ou lire une valeur de gpio, modifier le contenu du fichier **/var/robot_config/commands**.
- 3. Exécuter ```$ make install```
+ 1. Exécuter ```$ make install```
+ 2. Pour changer le chemin utilisé dans la boucle, modifier le contenu du fichier **/var/robot_config/program_path**.
+ 3. Pour changer les commandes utilisées pour initialiser les gpio ou lire une valeur de gpio, modifier le contenu du fichier **/var/robot_config/commands**.
 
 ### Procédure d'installation un peu moins facile
 
