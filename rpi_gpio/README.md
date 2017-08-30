@@ -9,7 +9,7 @@ For testing : *make test*
 
 Typical use of this module when installed is following :
 
-Markup : ```python
+```python
 
 def print_when_gpio_down()
     print "super callback ..."
@@ -28,7 +28,6 @@ import time
 time.sleep(10)
 
 gpio.join() #don't forget to properly close module
-
-         ```
+```
 
 For more information one can look at gpio_test.py.
