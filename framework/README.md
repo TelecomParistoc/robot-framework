@@ -12,4 +12,5 @@ to add objects like AX12 and functions like "move_AX12" on the skeleton of previ
 
 
 For testing (the command launches every available test, one can look specifically to these in order to have a good understanding of what a real use of this framework could be) :
+
 *make test*
