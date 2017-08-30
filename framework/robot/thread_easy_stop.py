@@ -11,9 +11,8 @@ class Thread_Easy_Stop(Thread):
         self.is_running = True
         self.delay = delay
         self.callback_in_loop = callback_in_loop
-        super(Thread, self).__init__(target=self.run)
-        threads.append(self)
-        self.start()
+        Thread.__init__(self)
+        Thread_Easy_Stop.threads.append(self)
 
     def run(self):
         beg = time.time()
@@ -36,7 +35,8 @@ class Thread_Easy_Stop(Thread):
             self.is_running = True
             self.start()
 
-    def stop_all_threads():
+    @classmethod
+    def stop_all_threads(cls):
         print "[+++] Stopping all remaining threads"
-        for t in threads:
+        for t in Thread_Easy_Stop.threads:
             t.stop()
