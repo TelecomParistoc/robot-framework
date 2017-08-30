@@ -324,7 +324,6 @@ class Robot:
 
 
     def launch_sequence(self, step):
-        print "LAUNCHINGGGG ", step
         self.sequence_mutex.acquire()
 
         for s,c in self.sequences[self.cur_sequence][step]:

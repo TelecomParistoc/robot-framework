@@ -32,6 +32,8 @@ class Wait_Object:
         if not self.stopped:
             return True
         else:
+            print "Callback calling"
+            print self.callback
             if callable(self.callback):
                 self.callback()
 
@@ -41,6 +43,8 @@ class Wait_Object:
         self.stopped = True
 
     def join(self):
+        print "None ?"
+        print self.thread
         if self.thread is not None:
             self.thread.stop()
             self.thread.join()
