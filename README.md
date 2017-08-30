@@ -37,3 +37,7 @@ board design [here](https://github.com/TelecomParistoc/radioboard).
 This library provides various functions to make use of AX12 digital servomotors. It's
 meant to run on the Raspberry-Pi. It exposes Python and Javascript bindings for an
 easy use. More info can be found [here](https://github.com/TelecomParistoc/libAX12).
+
+## GPIO
+Code in folder rpi_gpio contains capabilities of managing GPIO in python easily (and associate specific callbacks when value changes).
+It exposes an example gpio_test.py before any documentation would be available. More info can be found [here](https://github.com/TelecomParistoc/robot-framework/tree/master/rpi_gpio)
