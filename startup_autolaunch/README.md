@@ -29,7 +29,8 @@ Ce dossier contient :
 
 Les trois procédures d'installation suivantes sont de plus en plus "complexes" mais permettent à chaque fois une plus grand maîtrise des fichiers utilisés pour la configuration.
 
-### Procédure d'installation très facile
+
+### Procédure d'installation très facile ###
 
  1. Changer le chemin du fichier de script utilisé par le robot et les commandes d'inialisation/vérification de l'état situés dans **program_and_commands.config**.
  2. Exécuter ```$ make install```
