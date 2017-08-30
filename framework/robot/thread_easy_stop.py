@@ -16,11 +16,14 @@ class Thread_Easy_Stop(Thread):
 
     def run(self):
         beg = time.time()
+        print "Is running ?"
+        print self.is_running
         while self.is_running:
             if not self.callback_in_loop(time.time() - beg):
                 self.is_running = False
             time.sleep(self.delay)
         self.ended = True
+        print "ENDED"
 
     def stop(self):
         self.is_running = False

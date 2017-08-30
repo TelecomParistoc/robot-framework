@@ -15,25 +15,25 @@ if __name__ == "__main__":
 
     robot = init()
 
-    manage_jack = add_jack_and_delay(robot, 10)
-    gpio.assign_callback_on_gpio_down(jack_pin, lambda: manage_jack(False))
-    gpio.assign_callback_on_gpio_up(jack_pin, lambda: manage_jack(True))
+    manage_jack = add_jack_and_delay(robot, 100)
 
+    gpio.assign_callback_on_gpio_down(24, lambda: manage_jack(False))
+    gpio.assign_callback_on_gpio_up(24, lambda: manage_jack(True))
 
     # all that follows is for example purpose (no jack management here)
 
-    def execute_seq(robot_callback, wait_object):
+    def execute_seq(robot_callback, wait_object, robot):
         print "[+] Executing the only sequence of this test !"
-        wait_object.reset()
         wait_object.set_callback(robot_callback)
-
-    def stop_and_reset_wait_object(w, robot):
-        w.stop()
-        w.join()
         start_and_wait_test_seq(robot)
 
+    def stop_and_reset_wait_object(w):
+        w.stop()
+        w.join()
+        w.reset()
+
     def start_and_wait_test_seq(robot):
-        print "[+] Starting the test sequence"
+        print "[+] Adding the test sequence to queue"
         robot.start_sequence('test_seq')
         robot.wait_sequence()
 
@@ -44,13 +44,11 @@ if __name__ == "__main__":
     gpio.assign_callback_on_gpio_change(for_test_purpose_pin, lambda: stop_and_reset_wait_object(wait_object))
 
     robot.add_sequence('test_seq')
-    robot.add_parallel((lambda u: execute_seq(u, wait_object), True))
+    robot.add_parallel((lambda u: execute_seq(u, wait_object, robot), True))
     robot.wait()
     robot.sequence_done()
 
     start_and_wait_test_seq(robot)
-
-    robot.stop()
 
     gpio.join()
     Thread_Easy_Stop.stop_all_threads()
