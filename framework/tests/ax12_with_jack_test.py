@@ -1,7 +1,7 @@
 from ..robot.thread_easy_stop import Thread_Easy_Stop
 from ..robot.starting_block import add_jack_and_delay
 from ..local_robot.big_robot import *
-from I2C_bus import I2c_bus
+from I2C_bus import I2C_bus
 from AX12 import AX12
 import gpio
 import time
@@ -34,7 +34,12 @@ def start_seq(index, robot, callback):
 
 if __name__ == "__main__":
 
-    I2C_bus.init()
+    try:
+	I2C_bus.init()
+    except:
+        print "[-] Unable to start I2C communication, exiting"
+        exit()
+
     scanned = I2C_bus.scan(print_ax12_id_on_the_fly)
     if len(scanned)<2:
         print "[-] Not enough AX12 on I2C bus to achieve the sequence, exiting"
