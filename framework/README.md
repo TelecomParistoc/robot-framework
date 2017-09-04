@@ -1,4 +1,4 @@
-## Framework
+# Framework
 
 This folder contains the whole core of python framework that can be use to represent and instantiate robots and their actions.
 
@@ -11,5 +11,6 @@ to add objects like AX12 and functions like "move_AX12" on the skeleton of previ
 - tests : this folder is explicit and its content shows how to use the 2 previous folders in order to reach the goal of having a robot that performs specific actions.
 
 
-For testing : *make test*
-(the command launches every available test, one can look specifically to these in order to have a good understanding of what a real use of this framework could be)
+For testing (the command launches every available test, one can look specifically to these in order to have a good understanding of what a real use of this framework could be) :
+
+*make test*
