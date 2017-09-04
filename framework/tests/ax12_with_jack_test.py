@@ -35,7 +35,7 @@ def start_seq(index, robot, callback):
 if __name__ == "__main__":
 
     try:
-	I2C_bus.init()
+        I2C_bus.init()
     except:
         print "[-] Unable to start I2C communication, exiting"
         exit()
