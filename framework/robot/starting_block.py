@@ -14,6 +14,7 @@ def time_elapsed(delay, callback):
 def manage_time_elapsed(robot):
     print "[.] End of granted time, stopping robot"
     robot.stop()
+    Thread_Easy_Stop.stop_all_threads()
 
 
 

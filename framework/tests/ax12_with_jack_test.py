@@ -109,11 +109,8 @@ if __name__ == "__main__":
 
     wait_end = Wait_Object()
     wait_end.join()
-    
+
     print "kikoo"
     robot.stop()
     print "okok"
     gpio.join()
-    print "ahahah"
-    Thread_Easy_Stop.stop_all_threads()
-    print "ende"
