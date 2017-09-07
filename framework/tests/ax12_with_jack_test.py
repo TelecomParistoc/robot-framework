@@ -18,28 +18,32 @@ def callback_catch_print(c):
         print "Exception caught : "+str(e)
 
 x = 1
+prev_pos_1 = 0
+prev_pos_2 = 0
 def move_ax12(index, robot, callback):
     global x
+    pos = random.randint(0, 512)
+    sign = 2*random.randint(0, 1)-1
     if index == 1:
         try:
-            robot.AX12_first.set_torque(100)
-            robot.AX12_first.set_speed(10)
-            robot.AX12_first.move(random.randint(0, 1024), lambda: callback_catch_print(callback))
+            print "New position for first ax12 : "+str(min(1023, max(0, prev_pos_1+sign*pos)))
+            robot.AX12_first.move(min(1023, max(0, prev_pos_1+sign*pos)), lambda: callback_catch_print(callback))
         except Exception as e:
             print "Exception caught during ax12 moving "+str(e)
     else:
         try:
-            robot.AX12_second.set_torque(100)
-            robot.AX12_second.set_speed(10)
-            robot.AX12_second.move(random.randint(0,1024), lambda: callback_catch_print(callback))
+            print "New position for second ax12 : "+str(min(1023, max(0, prev_pos_2+sign*pos)))
+            robot.AX12_second.move(min(1023, max(0, prev_pos_2+sign*pos)), lambda: callback_catch_print(callback))
         except Exception as e:
             print "Exception caught during ax12 moving "+str(e)
 
 def start_seq(index, robot, callback):
     global x
     if index == 1:
+        print "Starting sequence 2"
         robot.start_sequence('ax12_2_seq')
     else:
+        print "Starting sequence 1"
         robot.start_sequence('ax12_1_seq')
     x += 1
     print x
@@ -74,6 +78,10 @@ if __name__ == "__main__":
     robot = init()
     robot.add_object(AX12_1, 'AX12_first')
     robot.add_object(AX12_2, 'AX12_second')
+    robot.AX12_first.set_torque(400)
+    robot.AX12_first.set_speed(100)
+    robot.AX12_second.set_torque(400)
+    robot.AX12_second.set_speed(100)
 
     manage_jack = add_jack_and_delay(robot, 100, False)
 
