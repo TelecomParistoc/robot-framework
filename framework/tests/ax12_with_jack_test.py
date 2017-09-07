@@ -58,8 +58,8 @@ if __name__ == "__main__":
         print "[-] Unable to start I2C communication ("+str(e)+"), exiting"
         exit()
 
-    #scanned = I2C_bus.scan(print_ax12_id_on_the_fly)
-    scanned = [129, 145]
+    scanned = I2C_bus.scan(print_ax12_id_on_the_fly)
+    #scanned = [129, 145]
     if len(scanned)<2:
         print "[-] Not enough AX12 on I2C bus to achieve the sequence, exiting"
         exit()
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     robot.AX12_second.set_torque(400)
     robot.AX12_second.set_speed(100)
 
-    manage_jack = add_jack_and_delay(robot, 10, False)
+    manage_jack = add_jack_and_delay(robot, 30)
 
     gpio.assign_callback_on_gpio_down(24, lambda: manage_jack(False))
     gpio.assign_callback_on_gpio_up(24, lambda: manage_jack(True))
