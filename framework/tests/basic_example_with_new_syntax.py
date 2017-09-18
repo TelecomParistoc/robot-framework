@@ -3,6 +3,8 @@
 from robot import Robot
 from AX12 import AX12
 
+
+# ---------------------------   ROBOT CONSTRUCTION   --------------------------#
 #creates the robot skeleton
 r = Robot()
 
@@ -11,6 +13,7 @@ r.add_object(AX12(141), "motor_1")
 r.add_object(AX12(130), "motor_2")
 
 
+# -------------------------   SEQUENCE DEFINITION ----------------------------#
 
 #defines a sequence of actions
 #note that the sequence is only defined and not run (for the moment)
@@ -36,9 +39,15 @@ r.wait()
 r.sequence_done()
 
 
+
+# --------------------- RUNNING ! ------------------------------------------#
+
 # We run the sequence we defined above
 r.start_sequence("seq_1")
 
 
 # We wait the end of the sequence execution
 r.wait_sequence()
+
+#close the thread
+r.stop()

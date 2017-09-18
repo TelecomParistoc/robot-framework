@@ -23,6 +23,7 @@ $ make test
 ## Basic tutorial
 
 This part explains how to use this framework with a basic example. We will command 2 AX12 motors using this framework.
+You can find the entiere source code of this example in *tests/basic_example_with_syntax.py*
 
 
 ### Construct the robot
