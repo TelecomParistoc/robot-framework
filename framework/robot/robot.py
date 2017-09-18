@@ -135,7 +135,7 @@ class Robot:
         return True
 
 
-    def add_parallel(self, function, arg_list, count_enable=True, force_root_seq=True):
+    def add_parallel(self, function, arg_list, count_enable=True, force_root_seq=False):
 	
 	if not (isinstance(arg_list, tuple) or isinstance(arg_list, list)):
 	    raise(TypeError("parameter arg_list must be a list or a tuple"))
@@ -144,11 +144,11 @@ class Robot:
 	    return self.private_add_parallel((lambda u: function(*(arg_list + [u])), True),
 					force_root_seq=force_root_seq)
 	else:
-	    return self.private_add_parallel((lambda u: function(*arg_list), False),
+	    return self.private_add_parallel((lambda: function(*arg_list), False),
 					force_root_seq=force_root_seq)
 
 
-    def private_add_parallel(self, to_call_and_is_callback, force_root_seq=True):
+    def private_add_parallel(self, to_call_and_is_callback, force_root_seq=False):
         self.sequence_mutex.acquire()
 
         if self.cur_sequence_constructed != "":
@@ -414,6 +414,7 @@ class Robot:
 
 
     def run(self):
+	spam_console = True
         self.started = True
         self.paused = False
         prev_time = time.time()
@@ -424,10 +425,11 @@ class Robot:
 
                 #print(self.cur_sequence, self.cur_parallel, self.sequences[self.cur_sequence], self.delays[self.cur_sequence], self.expected_callbacks[self.cur_sequence], self.sequence_queue)
                 if self.cur_sequence == "" and len(self.sequences[""]) <= 1 and len(self.sequences[""][0]) == 0:
-                    # non au spam de la console !!!
-		    #print("[...] No action in root sequence, doing nothing")
-		    pass
+                    if spam_console:
+		        print("[...] No action in root sequence, doing nothing")
+		        spam_console = False
                 else:
+		    spam_console = True
                     deltime = time.time()-prev_time
                     #print self.cur_sequence, self.cur_parallel, len(self.delays), len(self.delays[self.cur_sequence]), self.received_callbacks, self.expected_callbacks[self.cur_sequence]
                     if (self.delays[self.cur_sequence][self.cur_parallel]>0 and deltime>self.delays[self.cur_sequence][self.cur_parallel]) or self.received_callbacks >= self.expected_callbacks[self.cur_sequence][self.cur_parallel]:
