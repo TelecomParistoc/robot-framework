@@ -28,22 +28,21 @@ This part explains how to use this framework with a basic example. We will comma
 ### Construct the robot
 
 First of all, we import the libraries we need. So we import the robot skeleton from the robot library, and the AX12 class.
-'''python
+```python
 from robot import Robot
 from AX12 import AX12
-'''
+```
 
 Now, we can "construct" the skeleton of our robot. 
 ```python
 r = Robot()
-```python 
+```
 
 For the moment, we just have an "empty" skeleton. So we will add to the skeleton each object our robot is composed of. The AX12 I use have the ID 141 and 130, but of course you may have different ID. I named the AX12 141 and 130 "motor_1" and "motor_2" respectively.
 ```python
 r.add_object(AX12(141), "motor_1")
 r.add_object(AX12(130), "motor_2")
-```python
-
+```
 
 ### Define the actions the robot will do
 
@@ -53,9 +52,10 @@ r.add_sequence("seq_1")
 ```
 
 Each sequence is divided in blocks of actions. Each action in a same block will be done simultaneously, whereas blocks will be run one after the other. Generally speaking, we can add an action in a block like this :
-``python
+```python
 r.add_parallel(function, argument_list_of_the_function)
 ```
+
 Assume that we want to move the first motor at position 100 (in degrees), and second motor at position -150 (a positiv number is for clockwise rotation, a negativ for a counter clockwise rotation). So we write :
 ```python
 r.add_parallel(r.motor_1.move, [100])
