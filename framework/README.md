@@ -57,7 +57,7 @@ Each sequence is divided in blocks of actions. Each action in a same block will 
 r.add_parallel(function, argument_list_of_the_function)
 ```
 
-Assume that we want to move the first motor at position 100 (in degrees), and second motor at position -150 (a positiv number is for clockwise rotation, a negativ for a counter clockwise rotation). So we write :
+Assume that we want to move the first motor at position 100 (in degrees), and second motor at position -150 (a positiv number is for clockwise rotation, a negativ for a counter clockwise rotation). Note that you must specify a number in range [-150, 150], because of physical limitations of the motor. So we write :
 ```python
 r.add_parallel(r.motor_1.move, [100])
 r.add_parallel(r.motor_2.move, [-150])
@@ -85,7 +85,9 @@ r.add_parallel(r.motor_1.move, [100], False)
 r.wait(2)
 ``` 
 
-So motor_1 will turn at 100% of the maximum rotation speed. Don't forget to stop it in the following block :
+So motor_1 will turn at 100% of the maximum rotation speed. If you specify a negative speed, the motor will turn counter clockwise.
+
+Don't forget to stop it in the following block :
 ```
 r.add_parallel(r.motor_1.turn, [0], False)
 r.wait()
@@ -112,9 +114,6 @@ Finally, to quit the program :
 ```python
 r.stop()
 ```
-
-
-
 
 
 
