@@ -79,12 +79,17 @@ The second possibility is to specify not to wait for the end of all actions. It 
 r.add_parallel(function, arg_list, False) #the next r.wait() will not wait for the end of this action
 ```
 
-Come back to our example. After the first r.wait, we can define the second block of actions, for example :
+Come back to our example. After the first r.wait, we can define the second block of actions. Assume that, in this block, we want to move a motor at a given speed, and not at a given position. The code to do this is :
 ```python
-r.add_parallel(r.motor_1.move, [0])
-r.add_parallel(r.motor_2.move, [0])
+r.add_parallel(r.motor_1.move, [100], False)
 r.wait(2)
 ``` 
+
+So motor_1 will turn at 100% of the maximum rotation speed. Don't forget to stop it in the following block :
+```
+r.add_parallel(r.motor_1.turn, [0], False)
+r.wait()
+```
 
 And so forth... We can of course add as many blocks as we want. After adding the last block, we must specify the end of the sequence definition :
 ```python
