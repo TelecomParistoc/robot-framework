@@ -81,7 +81,7 @@ r.add_parallel(function, arg_list, False) #the next r.wait() will not wait for t
 
 Come back to our example. After the first r.wait, we can define the second block of actions. Assume that, in this block, we want to move a motor at a given speed, and not at a given position. The code to do this is :
 ```python
-r.add_parallel(r.motor_1.move, [100], False)
+r.add_parallel(r.motor_1.turn, [100], False)
 r.wait(2)
 ``` 
 
