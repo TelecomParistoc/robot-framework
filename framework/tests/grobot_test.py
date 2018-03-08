@@ -9,6 +9,14 @@ import gpio
 import random
 import time
 
+#TODO AX12 id's have to be completed
+catapult_id = 0
+sorting_wheel_id = 0
+ball_catcher_id = 0
+
+def catapult_ball():
+    catapult.turn()
+
 if __name__ == '__main__':
 
     print("Jack removed !")
@@ -25,9 +33,6 @@ if __name__ == '__main__':
         print "[-] Not enough AX12 on I2C bus to achieve the sequence, exiting"
         exit()
 
-    AX12_1 = AX12(scanned[0])
-    AX12_2 = AX12(scanned[1])
-
     gpio.init()
 
     jack_pin = gpio.gpio_index_of_wpi_pin(5)
@@ -38,7 +43,15 @@ if __name__ == '__main__':
 
     robot = init()
 
+    robot.add_object(AX12(catapult_id), "catapult")
+    robot.add_object(AX12(sorting_wheel_id), "sorting_wheel")
+    robot.add_object(AX12(ball_catcher_id), "ball_catcher")
+
     manage_jack = add_jack_and_delay(robot, 30)
 
     gpio.assign_callback_on_gpio_down(24, lambda: manage_jack(False))
     gpio.assign_callback_on_gpio_up(24, lambda: manage_jack(True))
+
+    #program
+
+    robot.stop()
