@@ -6,7 +6,27 @@ from encapsulate_callback import encapsulate_callback
 
 lib_gpio = ctypes.cdll.LoadLibrary(LIBNAME)
 
-lib_gpio.wpi_to_gpio.restype = ctypes.c_int
+lib_gpio.wpi_to_gpio.restype    = ctypes.c_int
+lib_gpio.set_pin_mode.restype   = None
+lib_gpio.set_pull_up_down.restype=None
+lib_gpio.pin_state.restype      = ctypes.c_int
+lib_gpio.set_pin_state.restype  = None
+lib_gpio.analog_read.restype    = ctypes.c_int
+lib_gpio.analog_write.restype = None
+lib_gpio.pwm_write.restype = None
+
+lib_gpio.assign_callback_on_gpio_change.restype = None
+lib_gpio.assign_callback_on_gpio_down.restype = None
+lib_gpio.assign_callback_on_gpio_up.restype = None
+
+lib_gpio.remove_callbacks_on_gpio_change.restype = None
+lib_gpio.remove_callbacks_on_gpio_down.restype = None
+lib_gpio.remove_callbacks_on_gpio_up.restype = None
+lib_gpio.remove_callbacks_on_gpio.restype = None
+lib_gpio.remove_all_callback.restype = None
+
+lib_gpio.init.restype = None
+lib_gpio.join.restype = None
 
 INPUT = 0
 OUTPUT = 1
