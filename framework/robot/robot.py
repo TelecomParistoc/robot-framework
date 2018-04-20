@@ -134,18 +134,24 @@ class Robot:
         self.sequence_mutex.release()
         return True
 
+    def add_parallel_thread(self, function, arg_list, count_enable=True, force_root_seq=False):
+        """
+            same as add_parallel but function is launched in a separated Thread
+        """
+        self.add_parallel(
+            lambda: Thread(target=function, args=arg_list).start(), [],
+            count_enable=count_enable, force_root_seq=force_root_seq)
 
     def add_parallel(self, function, arg_list, count_enable=True, force_root_seq=False):
-	
-	if not (isinstance(arg_list, tuple) or isinstance(arg_list, list)):
-	    raise(TypeError("parameter arg_list must be a list or a tuple"))
+    	if not (isinstance(arg_list, tuple) or isinstance(arg_list, list)):
+    	    raise(TypeError("parameter arg_list must be a list or a tuple"))
 
-	if count_enable:
-	    return self.private_add_parallel((lambda u: function(*(arg_list + [u])), True),
-					force_root_seq=force_root_seq)
-	else:
-	    return self.private_add_parallel((lambda: function(*arg_list), False),
-					force_root_seq=force_root_seq)
+    	if count_enable:
+    	    return self.private_add_parallel((lambda u: function(*(arg_list + [u])), True),
+    					force_root_seq=force_root_seq)
+    	else:
+    	    return self.private_add_parallel((lambda: function(*arg_list), False),
+    					force_root_seq=force_root_seq)
 
 
     def private_add_parallel(self, to_call_and_is_callback, force_root_seq=False):
