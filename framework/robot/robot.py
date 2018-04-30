@@ -2,6 +2,7 @@ from threading import Thread, Lock
 import types
 import time
 
+import motion
 
 class Robot:
     """
@@ -9,7 +10,7 @@ class Robot:
 	or specify sequences of actions
     """
 
-    def __init__(self, debug=True):
+    def __init__(self, debug=True, moving_interface=True):
 	"""
 	    Constructs a new Robot object, and launch the sequence thread
 	"""
@@ -32,6 +33,11 @@ class Robot:
 
         self.expected_callback_indexes = []
         self.current_callback_index = 0
+
+        if moving_interface:
+            for motion_attribute in dir(motion):
+                if callable(motion_attribute):
+                    self.add_method(getattr(motion, motion_attribute))
 
         self.started = False
         self.thread = Thread(target=lambda: self.run()).start()
