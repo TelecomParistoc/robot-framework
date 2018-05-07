@@ -55,6 +55,12 @@ def is_collision(robot, front_detection, rear_detection):
     backward_obstacle = False
     direction = robot.getDirection()
 
+    #debug
+    print("<i> front_detection: " + front_detection() + "\n"
+        + " | rear_detection: " + rear_detection() + "\n"
+        + " | closest_distance_to_edge front: " + closest_distance_to_edge(x + dx, y + dy) + "\n"
+        + " | closest_distance_to_edge rear: " + closest_distance_to_edge(x - dx, y - dy))
+
     #if the robot is close from an edge, the sensors are ignored
     if (direction == motion.DIR_FORWARD and front_detection()
         and closest_distance_to_edge(x + dx, y + dy) >= NO_SENSOR_DISTANCE):
