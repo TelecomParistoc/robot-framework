@@ -146,6 +146,7 @@ class Robot:
 
         #if stacks are not empty
         if self.x_dest_stack:
+            time.sleep(.3)
             motion.moveTo(self.x_dest_stack[-1], self.y_dest_stack[-1],
                         self.final_heading_stack[-1], self.private_moveTo_callback)
 

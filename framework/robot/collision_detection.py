@@ -85,12 +85,16 @@ def sensor_manager(robot, front_detection, rear_detection):
             robot.emergency_stop()
             time.sleep(DELAY_BEFORE_BYPASSING_OBSTACLE)
 
+            ## -------------------- MEANS OUR STRATEGY IS STOP ------------###
+            #must be improved !!!!!!
+            continue
+
             #check if obstacle is still there
             forward_obstacle, backward_obstacle = is_collision(robot,
                                                 front_detection, rear_detection)
             if not forward_obstacle and not backward_obstacle:
                 continue
-            
+
             x, y = get_intermediate_goal(robot, forward_obstacle,
                                                 backward_obstacle)
             robot.moveTo(x, y, final_heading=-1, callback=None)
