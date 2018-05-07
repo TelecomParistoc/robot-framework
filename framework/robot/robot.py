@@ -9,6 +9,7 @@ from os import listdir
 
 import motion
 import motordriver
+import collision_detection
 
 class Robot:
     """
@@ -55,6 +56,10 @@ class Robot:
             self.goal_dist = []
             self.move_callback = []
             self.load_moving_interface()
+
+            self.turning = False
+            self.turn_callback = []
+
         else:
             self.moving_interface = False
 
@@ -78,7 +83,7 @@ class Robot:
                 if callable(attr):
 
                     #these functions are already overriden, see below
-                    if attr.__name__ in ["moveTo", "move"]:
+                    if attr.__name__ in ["moveTo", "turn", "move"]:
                         continue
 
                     #warning: functions in motion or motordriver does not
@@ -89,6 +94,20 @@ class Robot:
                     #a more precise adaptation should be done
                     self.add_method((lambda attr_copy: (lambda *args: attr_copy(*args[1:])))(attr),
                                     name=attr.__name__)
+
+    def turn(self, heading, callback=lambda: None):
+
+        self.turning = True
+        self.turn_callback.append(callback)
+        motion.turn(heading, callback=self.private_turn_callback)
+
+    def private_turn_callback(self):
+        self.turning = False
+        self.turn_callback.pop()()
+
+    def set_turning(self, value):
+        #value must be True or False
+        self.turning = value
 
     def moveTo(self, x_dest, y_dest, final_heading=-1, callback=None,
                 erase=True):
@@ -112,6 +131,9 @@ class Robot:
         self.x_dest_stack.append(x_dest)
         self.y_dest_stack.append(y_dest)
         self.final_heading_stack.append(final_heading)
+        self.turning = True
+        motion.set_after_first_turn_of_move_to_callback(lambda: self.set_turning(False))
+        motion.set_after_translation_of_move_to_callback(lambda: self.set_turning(True))
         motion.moveTo(x_dest, y_dest, final_heading, self.private_moveTo_callback)
 
     def private_moveTo_callback(self):
@@ -119,6 +141,7 @@ class Robot:
         self.y_dest_stack.pop()
         self.final_heading_stack.pop()
         tmp = self.moveTo_callback_stack.pop()
+        self.turning = False
         if callable(tmp): tmp()
 
         #if stacks are not empty
@@ -151,15 +174,6 @@ class Robot:
             self.add_parallel(self.moveTo, [x, y, -1])
             self.wait(max_delay=max_delay)
 
-    def get_intermediate_goal(self, front_obstacle, rear_obstacle):
-        """
-            computes a new point to reach before going to the final goal
-            the idea is to avoid an obstacle
-            front obstacle, rear_obstacle == booleans
-        """
-        #TODO remplacer ce truc scandaleusement stupide (utiliser la couleur si dispo)
-        return (self.get_pos_X() + 100, self.get_pos_Y() + 100)
-
     def load_add_path(self, filename):
 
         if self.debug:
@@ -168,11 +182,7 @@ class Robot:
         self.add_path_to_follow(path)
 
 
-    def start_collision_detection(self, front_detection, rear_detection,
-                                    delay=0.05, no_sensor_distance=100,
-                                    table_dimensions=(3000, 2000),
-                                    heading_in_y_direction=0,
-                                    sensor_range=200):
+    def start_collision_detection(self, front_detection, rear_detection):
         """
             front_detection and rear_detection must be 2 functions without
             parameters, which respectively return True if and only if there is
@@ -188,47 +198,8 @@ class Robot:
             How to react when a collison is detected is not yet very well defined...
         """
         self.enable_collision_detection = True
-
-        def sensor_manager():
-
-            def is_close_from_edge(x, y):
-                return (x < no_sensor_distance or x > table_dimensions[0] - no_sensor_distance
-                    or y < no_sensor_distance or y > table_dimensions[1] - no_sensor_distance)
-
-            while self.enable_collision_detection:
-
-                x = self.get_pos_X()
-                y = self.get_pos_Y()
-
-                theta = self.get_heading()
-                tmp = (theta - heading_in_y_direction) * math.pi / 180.
-
-                dx = sensor_range * math.sin(tmp)
-                dy = sensor_range * math.cos(tmp)
-
-                forward_obstacle = False
-                backward_obstacle = False
-                direction = self.getDirection()
-
-                #if the robot is close from an edge, the sensors are ignored
-                if (direction == motion.DIR_FORWARD and front_detection()
-                        and is_close_from_edge(x + dx, y + dy)):
-                    print "[!] obstacle detected forwards!"
-                    forward_obstacle = True
-
-                if (direction == motion.DIR_BACKWARD and rear_detection()
-                        and is_close_from_edge(x - dx, y - dy)):
-                    print "[!] obstacle detected backwards!"
-                    forward_obstacle = True
-
-                if forward_obstacle or backward_obstacle:
-                    x, y = self.get_intermediate_goal(forward_obstacle,
-                                                        backward_obstacle)
-                    self.moveTo(x, y, final_heading=-1, callback=None)
-
-                time.sleep(delay)
-
-        self.collision_thread = Thread(target=sensor_manager, args=[])
+        self.collision_thread = Thread(target=collision_detection.sensor_manager,
+                                        args=[self, front_detection, rear_detection])
         self.collision_thread.start()
 
 
