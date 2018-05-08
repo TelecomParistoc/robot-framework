@@ -99,7 +99,7 @@ class Robot:
 
     def stop_motion(self):
         self.obstacle_stop = True
-        motion.move(0)
+        motion.move(1)
 
     def resume_motion(self):
         self.obstacle_stop = False

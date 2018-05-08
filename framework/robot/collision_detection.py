@@ -107,8 +107,15 @@ def sensor_manager(robot, front_detection, rear_detection):
 
         elif must_resume:
             print "Obstacle is gone! Resuming..."
+            x = robot.get_pos_X()
+            y = robot.get_pos_Y()
+            theta = robot.get_heading()
+            tmp = theta * math.pi / 180.
+            dx = SENSOR_RANGE * math.cos(tmp)
+            dy = SENSOR_RANGE * math.sin(tmp)
+            print robot.getDirection(), front_detection(), closest_distance_to_edge(x + dx, y + dy)
+
             robot.resume_motion()
-            time.sleep(.5)
             must_resume = False
 
         time.sleep(SENSOR_MANAGER_PERIOD)
