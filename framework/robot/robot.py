@@ -60,6 +60,8 @@ class Robot:
             self.turning = False
             self.turn_callback = []
 
+            self.obstacle_stop = False
+
         else:
             self.moving_interface = False
 
@@ -95,6 +97,15 @@ class Robot:
                     self.add_method((lambda attr_copy: (lambda *args: attr_copy(*args[1:])))(attr),
                                     name=attr.__name__)
 
+    def stop_motion(self):
+        self.obstacle_stop = True
+        motion.move(0)
+
+    def resume_motion(self):
+        self.obstacle_stop = False
+        self.moveTo(self.x_dest_stack.pop(), self.y_dest_stack.pop(),
+                    self.final_heading_stack.pop(), self.moveTo_callback_stack.pop())
+
     def turn(self, heading, callback=lambda: None):
 
         self.turning = True
@@ -122,6 +133,13 @@ class Robot:
         """
         if not self.moving_interface:
             print "[-] Error in Robot.moveTo; moving_interface is not enable"
+            return
+
+        if self.obstacle_stop:
+            self.moveTo_callback_stack = [callback] + self.moveTo_callback_stack
+            self.x_dest_stack = [x_dest] + self.x_dest_stack
+            self.y_dest_stack = [y_dest] + self.y_dest_stack
+            self.final_heading_stack = [final_heading] + self.self.final_heading_stack
             return
 
         if self.debug:

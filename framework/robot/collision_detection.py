@@ -8,7 +8,7 @@ SENSOR_RANGE        = 200
 
 #all durations are in seconds
 SENSOR_MANAGER_PERIOD = 0.05
-DELAY_BEFORE_BYPASSING_OBSTACLE = .5
+DELAY_BEFORE_BYPASSING_OBSTACLE = 2
 
 def closest_distance_to_edge(x, y):
     return min([x, y, TABLE_DIMENSION[0] - x, TABLE_DIMENSION[1] - y])
@@ -48,8 +48,8 @@ def is_collision(robot, front_detection, rear_detection):
     theta = robot.get_heading()
     tmp = theta * math.pi / 180.
 
-    dx = SENSOR_RANGE * math.sin(tmp)
-    dy = SENSOR_RANGE * math.cos(tmp)
+    dx = SENSOR_RANGE * math.cos(tmp)
+    dy = SENSOR_RANGE * math.sin(tmp)
 
     forward_obstacle = False
     backward_obstacle = False
@@ -58,10 +58,12 @@ def is_collision(robot, front_detection, rear_detection):
     #if the robot is close from an edge, the sensors are ignored
     if (direction == motion.DIR_FORWARD and front_detection()
         and closest_distance_to_edge(x + dx, y + dy) >= NO_SENSOR_DISTANCE):
+        print "front obstacle detected at ", x + dx, y + dy, " ; (x, y) = ", x, y
         forward_obstacle = True
 
     if (direction == motion.DIR_BACKWARD and rear_detection()
         and closest_distance_to_edge(x - dx, y - dy) >= NO_SENSOR_DISTANCE):
+        print "rear obstacle detected at ", x - dx, y - dy, " ; (x, y) = ", x, y
         backward_obstacle = True
 
     return forward_obstacle, backward_obstacle
@@ -82,12 +84,11 @@ def sensor_manager(robot, front_detection, rear_detection):
         forward_obstacle, backward_obstacle = is_collision(robot,
                                                 front_detection, rear_detection)
         if forward_obstacle or backward_obstacle:
-            if forward_obstacle: print "[!] obstacle detected backwards!"
-            if backward_obstacle: print "[!] obstacle detected forwards!"
-            robot.emergency_stop()
+            if forward_obstacle: print "[!] obstacle detected forwards!"
+            if backward_obstacle: print "[!] obstacle detected backwards!"
+            robot.stop_motion()
             must_resume = True
             time.sleep(DELAY_BEFORE_BYPASSING_OBSTACLE)
-
 
             ## -------------------- MEANS OUR STRATEGY IS STOP ------------###
             #must be improved !!!!!!
@@ -105,9 +106,9 @@ def sensor_manager(robot, front_detection, rear_detection):
             robot.emergency_resume()
 
         elif must_resume:
-            robot.emergency_resume()
+            print "Obstacle is gone! Resuming..."
+            robot.resume_motion()
+            time.sleep(.5)
             must_resume = False
-            robot.moveTo(robot.x_dest_stack[-1], robot.y_dest_stack[-1],
-                        robot.final_heading_stack[-1])
 
         time.sleep(SENSOR_MANAGER_PERIOD)
