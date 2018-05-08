@@ -8,7 +8,7 @@ SENSOR_RANGE        = 200
 
 #all durations are in seconds
 SENSOR_MANAGER_PERIOD = 0.05
-DELAY_BEFORE_BYPASSING_OBSTACLE = 2.
+DELAY_BEFORE_BYPASSING_OBSTACLE = .5
 
 def closest_distance_to_edge(x, y):
     return min([x, y, TABLE_DIMENSION[0] - x, TABLE_DIMENSION[1] - y])
@@ -79,10 +79,6 @@ def sensor_manager(robot, front_detection, rear_detection):
 
     while robot.enable_collision_detection:
 
-        if must_resume:
-            robot.emergency_resume()
-            must_resume = False
-
         forward_obstacle, backward_obstacle = is_collision(robot,
                                                 front_detection, rear_detection)
         if forward_obstacle or backward_obstacle:
@@ -107,5 +103,11 @@ def sensor_manager(robot, front_detection, rear_detection):
                                                 backward_obstacle)
             robot.moveTo(x, y, final_heading=-1, callback=None)
             robot.emergency_resume()
+
+        elif must_resume:
+            robot.emergency_resume()
+            must_resume = False
+            robot.moveTo(robot.x_dest_stack[-1], robot.y_dest_stack[-1],
+                        robot.final_heading_stack[-1])
 
         time.sleep(SENSOR_MANAGER_PERIOD)
