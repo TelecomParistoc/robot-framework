@@ -55,12 +55,6 @@ def is_collision(robot, front_detection, rear_detection):
     backward_obstacle = False
     direction = robot.getDirection()
 
-    #debug
-    print("<i> front_detection: " + front_detection() + "\n"
-        + " | rear_detection: " + rear_detection() + "\n"
-        + " | closest_distance_to_edge front: " + closest_distance_to_edge(x + dx, y + dy) + "\n"
-        + " | closest_distance_to_edge rear: " + closest_distance_to_edge(x - dx, y - dy))
-
     #if the robot is close from an edge, the sensors are ignored
     if (direction == motion.DIR_FORWARD and front_detection()
         and closest_distance_to_edge(x + dx, y + dy) >= NO_SENSOR_DISTANCE):
@@ -81,7 +75,13 @@ def sensor_manager(robot, front_detection, rear_detection):
         and +y axis corresponds to heading 90 degrees
     """
 
+    must_resume = False
+
     while robot.enable_collision_detection:
+
+        if must_resume:
+            robot.emergency_resume()
+            must_resume = False
 
         forward_obstacle, backward_obstacle = is_collision(robot,
                                                 front_detection, rear_detection)
@@ -89,7 +89,9 @@ def sensor_manager(robot, front_detection, rear_detection):
             if forward_obstacle: print "[!] obstacle detected backwards!"
             if backward_obstacle: print "[!] obstacle detected forwards!"
             robot.emergency_stop()
+            must_resume = True
             time.sleep(DELAY_BEFORE_BYPASSING_OBSTACLE)
+
 
             ## -------------------- MEANS OUR STRATEGY IS STOP ------------###
             #must be improved !!!!!!
