@@ -103,7 +103,7 @@ class Robot:
 
     def resume_motion(self):
         self.obstacle_stop = False
-        if self.x_dest_stack and y_dest_stack and self.final_heading_stack:
+        if self.x_dest_stack and self.y_dest_stack and self.final_heading_stack:
             self.moveTo(self.x_dest_stack.pop(), self.y_dest_stack.pop(),
                     self.final_heading_stack.pop(), self.moveTo_callback_stack.pop())
 
