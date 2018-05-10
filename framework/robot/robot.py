@@ -103,7 +103,8 @@ class Robot:
 
     def resume_motion(self):
         self.obstacle_stop = False
-        self.moveTo(self.x_dest_stack.pop(), self.y_dest_stack.pop(),
+        if self.x_dest_stack and y_dest_stack and self.final_heading_stack:
+            self.moveTo(self.x_dest_stack.pop(), self.y_dest_stack.pop(),
                     self.final_heading_stack.pop(), self.moveTo_callback_stack.pop())
 
     def turn(self, heading, callback=lambda: None):
@@ -139,7 +140,7 @@ class Robot:
             self.moveTo_callback_stack = [callback] + self.moveTo_callback_stack
             self.x_dest_stack = [x_dest] + self.x_dest_stack
             self.y_dest_stack = [y_dest] + self.y_dest_stack
-            self.final_heading_stack = [final_heading] + self.self.final_heading_stack
+            self.final_heading_stack = [final_heading] + self.final_heading_stack
             return
 
         if self.debug:
