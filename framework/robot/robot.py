@@ -193,12 +193,12 @@ class Robot:
             self.add_parallel(self.moveTo, [x, y, -1])
             self.wait(max_delay=max_delay)
 
-    def load_add_path(self, filename):
+    def load_add_path(self, filename, max_delay=15):
 
         if self.debug:
             print "[+] adding path: " + filename
         path = json_to_python(filename, self.color)
-        self.add_path_to_follow(path)
+        self.add_path_to_follow(path, max_delay=max_delay)
 
 
     def start_collision_detection(self, front_detection, rear_detection):
