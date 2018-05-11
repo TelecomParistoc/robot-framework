@@ -3,7 +3,7 @@ import motion
 
 #all distances are in mm
 TABLE_DIMENSION     = [3000, 2000]
-NO_SENSOR_DISTANCE  = 100
+NO_SENSOR_DISTANCE  = 300
 SENSOR_RANGE        = 200
 
 #all durations are in seconds
@@ -101,7 +101,7 @@ def sensor_manager(robot, front_detection, rear_detection):
                 continue
 
             x, y = get_intermediate_goal(robot, forward_obstacle,
-                                                backward_obstacle)
+                                                backward_obstacle, erase=False)
             robot.moveTo(x, y, final_heading=-1, callback=None)
             robot.emergency_resume()
 

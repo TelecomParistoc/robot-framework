@@ -6,6 +6,8 @@ import math
 
 import json
 from os import listdir
+import os
+import signal
 
 import motion
 import motordriver
@@ -41,6 +43,8 @@ class Robot:
 
         self.expected_callback_indexes = []
         self.current_callback_index = 0
+
+        self.t_0 = time.time()
 
         if moving_interface:
             self.moving_interface = True
@@ -99,6 +103,7 @@ class Robot:
 
     def stop_motion(self):
         self.obstacle_stop = True
+        self.frozen_time = time.time()
         motion.move(1)
 
     def resume_motion(self):
@@ -121,6 +126,11 @@ class Robot:
         #value must be True or False
         self.turning = value
 
+    def erase_moveTo_stack(self):
+        self.x_dest_stack = []
+        self.y_dest_stack = []
+        self.final_heading_stack = []
+
     def moveTo(self, x_dest, y_dest, final_heading=-1, callback=None,
                 erase=True):
         """
@@ -129,7 +139,7 @@ class Robot:
             after an emergency stop
 
             If erase is set to True, all previous orders are forgotten
-            Otherwise, the order is piled on a stack, so the previous orders
+            Otherwise, order is piled on a stack, so previous orders
             will be executed afterwards
         """
         if not self.moving_interface:
@@ -144,7 +154,10 @@ class Robot:
             return
 
         if self.debug:
-            print "[moveTo Python] from ", self.get_pos_X(), self.get_pos_Y(), "to", x_dest, y_dest
+            print "[moveTo Python] from ", self.get_pos_X(), self.get_pos_Y(), "to", x_dest, y_dest, " ; time = ", time.time() - self.t_0
+
+        if erase:
+            self.erase_moveTo_stack()
 
         self.moveTo_callback_stack.append(callback)
         self.x_dest_stack.append(x_dest)
@@ -169,12 +182,16 @@ class Robot:
             motion.moveTo(self.x_dest_stack[-1], self.y_dest_stack[-1],
                         self.final_heading_stack[-1], self.private_moveTo_callback)
 
-    def move(self, goal_dist, callback=None):
+    def move(self, goal_dist, callback=None, erase=True):
         """
             same thing as moveTo
         """
-        self.goal_dist.append(goal_dist)
-        self.move_callback.append(callback)
+        if erase:
+            self.goal_dist.append(goal_dist)
+            self.move_callback.append(callback)
+        else:
+            self.goal_dist.append(goal_dist)
+            self.move_callback.append(callback)
         motion.move(goal_dist, self.private_move_callback)
 
     def private_move_callback(self):
@@ -322,6 +339,8 @@ class Robot:
         self.temp_expected_callbacks = [0]
 
         self.sequence_mutex.release()
+
+        self.list_parallel_threads = []
         return True
 
     def add_parallel_thread(self, function, arg_list, count_enable=True, force_root_seq=False):
@@ -329,9 +348,14 @@ class Robot:
             same as add_parallel but function is launched in a separated Thread
         """
 
+        def to_be_added(*args):
+            t = Thread(target=function, args=args)
+            self.list_parallel_threads.append(t)
+            t.start()
+
         self.add_parallel(
-            lambda *args: Thread(target=function, args=args).start(), arg_list,
-            count_enable=count_enable, force_root_seq=force_root_seq)
+            lambda *args: to_be_added(*args), arg_list,
+                    count_enable=count_enable, force_root_seq=force_root_seq)
 
     def add_parallel(self, function, arg_list, count_enable=True, force_root_seq=False):
     	if not (isinstance(arg_list, tuple) or isinstance(arg_list, list)):
@@ -609,6 +633,16 @@ class Robot:
         if self.debug:
             print("[++] Unpausing thread")
 
+    def custom_timer(self):
+        """
+            if we are avoiding an obstacle, we want to shift all our actions in
+            time.
+        """
+
+        if not self.obstacle_stop:
+            return time.time() + self.time_offset
+        else:
+            return self.frozen_time
 
     def run(self):
 	spam_console = True
@@ -694,7 +728,7 @@ class Robot:
                                 self.reset_waited_callbacks_release_acquire_launch_sequence(self.cur_parallel)
                                 if self.debug:
                                     if self.cur_sequence != "":
-                                        print("[+] Parallel block "+str(self.cur_parallel)+" done in sequence "+self.cur_sequence+"; continuing")
+                                        print "[+] Parallel block "+str(self.cur_parallel)+" done in sequence "+self.cur_sequence+"; continuing (time stamp =", time.time() - self.t_0, ")"
 
                 self.sequence_mutex.release()
 
@@ -705,8 +739,14 @@ class Robot:
     def stop(self):
         self.started = False
         self.stop_collision_sensors()
+        if self.moving_interface:
+            self.emergency_stop()
         if self.debug:
             print("[++][...] Stopping sequence thread")
+
+        time.sleep(.05) #make sure previous order have been sent
+
+        os.kill(os.getpid(), signal.SIGKILL)
 
     def is_running(self):
         return self.started
