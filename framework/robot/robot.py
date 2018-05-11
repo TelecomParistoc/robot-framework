@@ -45,6 +45,10 @@ class Robot:
         self.current_callback_index = 0
 
         self.t_0 = time.time()
+        self.frozen_time = None
+        self.time_offset = 0
+
+	self.to_call_at_stop = None
 
         if moving_interface:
             self.moving_interface = True
@@ -108,6 +112,7 @@ class Robot:
 
     def resume_motion(self):
         self.obstacle_stop = False
+        self.time_offset += time.time() - self.frozen_time
         if self.x_dest_stack and self.y_dest_stack and self.final_heading_stack:
             self.moveTo(self.x_dest_stack.pop(), self.y_dest_stack.pop(),
                     self.final_heading_stack.pop(), self.moveTo_callback_stack.pop())
@@ -169,13 +174,14 @@ class Robot:
         motion.moveTo(x_dest, y_dest, final_heading, self.private_moveTo_callback)
 
     def private_moveTo_callback(self):
-        self.x_dest_stack.pop()
-        self.y_dest_stack.pop()
-        self.final_heading_stack.pop()
-        tmp = self.moveTo_callback_stack.pop()
-        self.turning = False
-        if callable(tmp): tmp()
+        if self.x_dest_stack:
+	    self.x_dest_stack.pop()
+            self.y_dest_stack.pop()
+            self.final_heading_stack.pop()
+            tmp = self.moveTo_callback_stack.pop()
+            if callable(tmp): tmp()
 
+	self.turning = False
         #if stacks are not empty
         if self.x_dest_stack:
             time.sleep(.3)
@@ -640,7 +646,7 @@ class Robot:
         """
 
         if not self.obstacle_stop:
-            return time.time() + self.time_offset
+            return time.time() - self.time_offset
         else:
             return self.frozen_time
 
@@ -648,7 +654,7 @@ class Robot:
 	spam_console = True
         self.started = True
         self.paused = False
-        prev_time = time.time()
+        prev_time = self.custom_timer()
         print("[+++] Starting sequence thread")
         while self.started:
             if not self.paused:
@@ -661,7 +667,7 @@ class Robot:
 		        spam_console = False
                 else:
 		    spam_console = True
-                    deltime = time.time()-prev_time
+                    deltime = self.custom_timer()-prev_time
                     #print self.cur_sequence, self.cur_parallel, len(self.delays), len(self.delays[self.cur_sequence]), self.received_callbacks, self.expected_callbacks[self.cur_sequence]
                     if (self.delays[self.cur_sequence][self.cur_parallel]>0 and deltime>self.delays[self.cur_sequence][self.cur_parallel]) or self.received_callbacks >= self.expected_callbacks[self.cur_sequence][self.cur_parallel]:
                         if self.cur_sequence == "":
@@ -677,7 +683,7 @@ class Robot:
 
                             self.cur_parallel = 0
                             self.received_callbacks = 0
-                            prev_time = time.time()
+                            prev_time = self.custom_timer()
 
                             if len(self.sequences[""])>=1:
                                 del self.sequences[""][0]
@@ -718,13 +724,13 @@ class Robot:
                                     self.cur_sequence = ''
 
                                 self.cur_parallel = 0
-                                prev_time = time.time()
+                                prev_time = self.custom_timer()
                                 self.reset_waited_callbacks_release_acquire_launch_sequence()
 
                                 if self.debug:
                                     print("[+++] Parallel block "+str(prev_parallel)+" done, all actions of sequence "+prev+" has been done, we return to "+seq+" sequence")
                             else:
-                                prev_time = time.time()
+                                prev_time = self.custom_timer()
                                 self.reset_waited_callbacks_release_acquire_launch_sequence(self.cur_parallel)
                                 if self.debug:
                                     if self.cur_sequence != "":
@@ -743,8 +749,10 @@ class Robot:
             self.emergency_stop()
         if self.debug:
             print("[++][...] Stopping sequence thread")
-
-        time.sleep(.05) #make sure previous order have been sent
+	
+	if callable(self.to_call_at_stop):
+	    self.to_call_at_stop()
+        time.sleep(.2) #make sure previous orders have been sent
 
         os.kill(os.getpid(), signal.SIGKILL)
 
