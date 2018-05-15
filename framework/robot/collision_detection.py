@@ -35,22 +35,8 @@ def get_intermediate_goal(robot, front_obstacle, rear_obstacle, direction):
     if direction == motion.DIR_BACKWARD:
         new_x = x + DETOUR_LENGTH * math.cos(theta)
         new_y = y + DETOUR_LENGTH * math.sin(theta)
-
+    #TODO Avoid contact with a wall
     return (int(new_x), int(new_y))
-
-    p_left_x    = x + DETOUR_LENGTH * math.cos(theta -  math.pi / 2.)
-    p_left_y    = y + DETOUR_LENGTH * math.sin(theta -  math.pi / 2.)
-    p_right_x   = x + DETOUR_LENGTH * math.cos(theta +  math.pi / 2.)
-    p_right_y   = y + DETOUR_LENGTH * math.sin(theta +  math.pi / 2.)
-
-    #we go as far from edges as possible
-    if (closest_distance_to_edge(p_left_x, p_left_y)
-            > closest_distance_to_edge(p_right_x, p_right_y)):
-	print "[Collision Detection] Setting new goal to the left" 
-        return (int(p_left_x), int(p_left_y))
-    print "[Collision Detection] Setting new goal to the right" 
-    return (int(p_right_x), int(p_right_y))
-
 
 def is_collision(robot, front_detection, rear_detection, direction):
 
