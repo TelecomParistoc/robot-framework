@@ -60,6 +60,12 @@ class Robot:
             self.final_heading_stack = []
             self.moveTo_callback_stack = []
 
+            #variables for moveTo when an obstacle is blocking the direct path
+            self.x_dest_avoiding_obstacle_stack = []
+            self.y_dest_avoiding_obstacle_stack = []
+            self.final_heading_avoiding_obstacle_stack = []
+            self.moveTo_callback_avoiding_obstacle_stack = []
+            
             #variables for move
             self.goal_dist = []
             self.move_callback = []
@@ -108,11 +114,19 @@ class Robot:
     def stop_motion(self):
         self.obstacle_stop = True
         self.frozen_time = time.time()
-        motion.move(1)
+        if self.getDirection() == motion.DIR_FORWARD:
+            motion.move(1)
+        else:
+            motion.move(-1)
 
     def resume_motion(self):
+	print"[Collision Detection] Restarting movement blocked by obstacle"
         self.obstacle_stop = False
         self.time_offset += time.time() - self.frozen_time
+        self.moveTo_callback_avoiding_obstacle_stack = []
+        self.x_dest_avoiding_obstacle_stack = []
+        self.y_dest_avoiding_obstacle_stack = []
+        self.final_heading_avoiding_obstacle_stack = []
         if self.x_dest_stack and self.y_dest_stack and self.final_heading_stack:
             self.moveTo(self.x_dest_stack.pop(), self.y_dest_stack.pop(),
                     self.final_heading_stack.pop(), self.moveTo_callback_stack.pop())
@@ -151,15 +165,20 @@ class Robot:
             print "[-] Error in Robot.moveTo; moving_interface is not enable"
             return
 
-        if self.obstacle_stop:
-            self.moveTo_callback_stack = [callback] + self.moveTo_callback_stack
-            self.x_dest_stack = [x_dest] + self.x_dest_stack
-            self.y_dest_stack = [y_dest] + self.y_dest_stack
-            self.final_heading_stack = [final_heading] + self.final_heading_stack
-            return
-
         if self.debug:
             print "[moveTo Python] from ", self.get_pos_X(), self.get_pos_Y(), "to", x_dest, y_dest, " ; time = ", time.time() - self.t_0
+
+        if self.obstacle_stop:
+            self.temp_expected_callbacks[-1] += 1
+            self.moveTo_callback_avoiding_obstacle_stack.append(callback) #The stack is useless in this case, but let's keep it just in case we need a better approach
+            self.x_dest_avoiding_obstacle_stack.append(x_dest)
+            self.y_dest_avoiding_obstacle_stack.append(y_dest)
+            self.final_heading_avoiding_obstacle_stack.append(final_heading)
+	    self.turning = True
+	    motion.set_after_first_turn_of_move_to_callback(lambda: self.set_turning(False))
+	    motion.set_after_translation_of_move_to_callback(lambda: self.set_turning(True))
+	    motion.moveTo(x_dest, y_dest, final_heading, self.private_moveTo_callback)
+            return
 
         if erase:
             self.erase_moveTo_stack()
@@ -174,6 +193,23 @@ class Robot:
         motion.moveTo(x_dest, y_dest, final_heading, self.private_moveTo_callback)
 
     def private_moveTo_callback(self):
+
+        #It's ugly, but there was no other choice	
+        if self.obstacle_stop:
+            if self.x_dest_avoiding_obstacle_stack:
+	        self.x_dest_avoiding_obstacle_stack.pop()
+                self.y_dest_avoiding_obstacle_stack.pop()
+                self.final_heading_avoiding_obstacle_stack.pop()
+                tmp = self.moveTo_callback_avoiding_obstacle_stack.pop()
+                if callable(tmp): tmp()
+
+	    self.turning = False
+            #if stacks are not empty
+            if self.x_dest_avoiding_obstacle_stack:
+                time.sleep(.3)
+                motion.moveTo(self.x_dest_avoiding_obstacle_stack[-1], self.y_dest_avoiding_obstacle_stack[-1],
+                        self.final_heading_avoiding_obstacle_stack[-1], self.private_moveTo_callback)
+	
         if self.x_dest_stack:
 	    self.x_dest_stack.pop()
             self.y_dest_stack.pop()
@@ -193,6 +229,8 @@ class Robot:
             same thing as moveTo
         """
         if erase:
+            self.goal_dist = []
+            self.move_callback = []
             self.goal_dist.append(goal_dist)
             self.move_callback.append(callback)
         else:
@@ -201,9 +239,10 @@ class Robot:
         motion.move(goal_dist, self.private_move_callback)
 
     def private_move_callback(self):
-        self.goal_dist.pop()
-        tmp = self.move_callback.pop()
-        if callable(tmp): tmp()
+        if self.goal_dist:
+            self.goal_dist.pop()
+            tmp = self.move_callback.pop()
+            if callable(tmp): tmp()
 
 
     def add_path_to_follow(self, path, max_delay=15):
@@ -609,12 +648,13 @@ class Robot:
     def receive_callback(self, index):
         self.sequence_mutex.acquire()
 
-        if index in self.expected_callback_indexes:
-            self.received_callbacks += 1
-            if self.debug:
-                print("[++] One more callback with ID "+str(index)+" received ("+str(self.received_callbacks)+" out of "+str(len(self.expected_callback_indexes))+")")
-        elif self.debug:
-            print("[-] Callback with ID "+str(index)+" received but it's not an expected callback")
+        if not self.obstacle_stop:
+            if index in self.expected_callback_indexes:
+                self.received_callbacks += 1
+                if self.debug:
+                    print("[++] One more callback with ID "+str(index)+" received ("+str(self.received_callbacks)+" out of "+str(len(self.expected_callback_indexes))+")")
+            elif self.debug:
+                print("[-] Callback with ID "+str(index)+" received but it's not an expected callback")
 
         self.sequence_mutex.release()
 
