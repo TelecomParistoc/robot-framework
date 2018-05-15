@@ -58,12 +58,12 @@ def is_collision(robot, front_detection, rear_detection):
     #if the robot is close from an edge, the sensors are ignored
     if (direction == motion.DIR_FORWARD and front_detection()
         and closest_distance_to_edge(x + dx, y + dy) >= NO_SENSOR_DISTANCE):
-        print "front obstacle detected at ", x + dx, y + dy, " ; (x, y) = ", x, y
+        print("front obstacle detected at ", x + dx, y + dy, " ; (x, y) = ", x, y)
         forward_obstacle = True
 
     if (direction == motion.DIR_BACKWARD and rear_detection()
         and closest_distance_to_edge(x - dx, y - dy) >= NO_SENSOR_DISTANCE):
-        print "rear obstacle detected at ", x - dx, y - dy, " ; (x, y) = ", x, y
+        print("rear obstacle detected at ", x - dx, y - dy, " ; (x, y) = ", x, y)
         backward_obstacle = True
 
     return forward_obstacle, backward_obstacle
@@ -86,8 +86,8 @@ def sensor_manager(robot, front_detection, rear_detection):
         forward_obstacle, backward_obstacle = is_collision(robot,
                                                 front_detection, rear_detection)
         if forward_obstacle or backward_obstacle:
-            if forward_obstacle: print "[!] obstacle detected forwards!"
-            if backward_obstacle: print "[!] obstacle detected backwards!"
+            if forward_obstacle: print("[!] obstacle detected forwards!")
+            if backward_obstacle: print("[!] obstacle detected backwards!")
             robot.stop_motion()
             must_resume = True
             time.sleep(DELAY_BEFORE_BYPASSING_OBSTACLE)
@@ -108,14 +108,14 @@ def sensor_manager(robot, front_detection, rear_detection):
             robot.emergency_resume()
 
         elif must_resume:
-            print "Obstacle is gone! Resuming..."
+            print("Obstacle is gone! Resuming...")
             x = robot.get_pos_X()
             y = robot.get_pos_Y()
             theta = robot.get_heading()
             tmp = theta * math.pi / 180.
             dx = SENSOR_RANGE * math.cos(tmp)
             dy = SENSOR_RANGE * math.sin(tmp)
-            print robot.getDirection(), front_detection(), closest_distance_to_edge(x + dx, y + dy)
+            print(robot.getDirection(), front_detection(), closest_distance_to_edge(x + dx, y + dy))
 
             robot.resume_motion()
             must_resume = False
