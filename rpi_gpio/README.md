@@ -2,10 +2,15 @@
 
 This folder contains all that is useful to use raspberry GPIO from python program (it internally uses a C++ thread so one must correctly close it before exiting).
 
-For installing : *sudo make install*
+For installing :
+```Shell
+$ sudo make install
+```
 
-For testing : *make test*
-
+For testing :
+```Shell
+$ make test
+```
 
 Typical use of this module when installed is following :
 
