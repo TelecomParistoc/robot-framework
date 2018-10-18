@@ -1,4 +1,6 @@
-from threading import Thread
+from threading import Thread, Condition, Lock
+from AX12 import AX12
+import time
 debug = True
 
 class Action:
@@ -10,23 +12,28 @@ class Action:
     def __init__(self, callback : callable = lambda : None):
         # callback is called when an action is over
         self.callback = callback
-        # parent_callback is used to count the number of callbacks in a
-        # sequence
         self.to_be_waited = False
+        self.timeout = None
         self.parent_sequence = None
+        self.done = False
+        # Conditional variable : an object that allows a thread to wait for an event 
+        # from another thread. Used to wait for actions to end.
+        self.done_condvar = Condition()
 
     def private_callback(self):
         '''
         This function is called when the action is finished.
         '''
-        if(not self.callback is None):
+        self.done_condvar.acquire()
+        self.done = True
+        self.done_condvar.notify()
+        if not self.callback is None:
             self.callback()
-        if(not self.parent_sequence is None):
-            self.parent_sequence.element_callback(self)
-        else if(self.to_be_waited):
-            waiting_for_callback = False
+        if not self.parent_sequence is None:
+            self.parent_sequence.element_callback()
+        self.done_condvar.release()
 
-    def wait(self) -> 'Action':
+    def wait(self, timeout : float = None) -> 'Action':
         '''
         Sets the to_be_waited flag: action callbacks will be waited for before
         continuing execution
@@ -35,75 +42,124 @@ class Action:
             raise(Error("Cannot wait an action without callback"))
         else:
             self.to_be_waited = True
+            self.timeout = timeout
         return self
-
+    
     def exec(self):
-        '''
-        Has to be called in the end of all overriden exec in order to prevent the
-        program from being killed if the callback has to be waited for.
-        '''
-        if(self.to_be_waited && self.parent_sequence == None):
-            self.waiting_for_callback = True
-            while(waiting_for_callback):
-                pass
+        self.private_exec()
+        if(self.to_be_waited):
+            self.done_condvar.acquire()
+            t0 = time.time()
+            t1 = t0
+            while not self.done:
+                self.done_condvar.wait(self.timeout - (t1 - t0))
+                t1 = time.time()
+                if ((t1 - t0) >= self.timeout) and not self.done:
+                    print(self, "timed out.")
+                    self.cancel_exec()
+                    break
+            self.done_condvar.release()
 
+    def cancel_exec(self):
+        if(not (self.callback is None or self.parent_sequence is None)):
+            self.parent_sequence.element_cancel()
 
 class Sequence(Action):
     '''
     A sequence is a collection of actions
     '''
-    def __init__(self, callback : callable = lambda : None, name : str = None):
+    def __init__(self, name = None, callback : callable = lambda : None):
         Action.__init__(self, callback)
         self.action_list = []
         self.current_action_idx = 0
         self.nb_callbacks = 0
         self.name = name
+        # A lock preventing a simultaneous construction and execution of the sequence
+        self.mutex = Lock()
 
-    def add_action(self, action : Action) -> 'Sequence':
-        self.action_list.append(action)
+    def __str__(self) -> str:
+        if not self.name is None:
+            return "Sequence " + self.name
+        else:
+            return "Unnamed sequence"
+
+    def add_action(self, action : Action, position : int = -1) -> 'Sequence':
+        '''
+        Adds an action in the sequence at the given position.
+        '''
+        self.mutex.acquire()
+        position = len(self.action_list) if position == -1 else position
+        position = max(self.current_action_idx, position)
+        self.action_list.insert(position, action)
         if(not action.callback is None):
             self.nb_callbacks += 1
-        # New callback to count the number of callbacks
         action.parent_sequence = self
+        self.mutex.release()
         return self
 
     def add_actions(self, actions) -> 'Sequence':
+        '''
+        Takes a list of actions and adds it in order to the sequence.
+        '''
         for action in actions:
             self.add_action(action)
         return self
 
-    # parent_callback for actions in the sequence
-    def element_callback(self, action):
-        print("Callback received in sequence", self.name)
+    def element_callback(self):
+        '''
+        Called whenever an action of the sequence executes its callback.
+        Allows to count the number of callbacks left.
+        '''
+        self.mutex.acquire()
         self.nb_callbacks -= 1
-        # If the action was being waited for, the execution has to be resumed
-        if(action.to_be_waited):
-            self.exec()
+        print("Callback received in sequence", self.name, ",", \
+                self.nb_callbacks, "expected callbacks left")
         # If all expected callbacks have been received, call the sequence callback
         if(self.nb_callbacks == 0):
+            self.mutex.release()
             self.private_callback()
+        else:
+            self.mutex.release()
 
-    def exec(self):
+    def element_cancel(self):
+        '''
+        Called when an element of the sequence cancels its execution, in particular
+        in a timeout situation.
+        '''
+        self.mutex.acquire()
+        self.nb_callbacks -= 1
+        print("Element execution canceled in sequence", self.name, ",", \
+                self.nb_callbacks, "expected callbacks left")
+        # If all expected callbacks have been received, call the sequence callback
+        if(self.nb_callbacks == 0):
+            self.mutex.release()
+            self.private_callback()
+        else:
+            self.mutex.release()
+
+    def private_exec(self):
+        '''
+        Is called by the Action.exec() function. Executes the actions of all elements of
+        the sequence.
+        '''
         while self.current_action_idx < len(self.action_list):
             if debug:
                 print("Executing action number", self.current_action_idx, \
                        "in sequence", self.name)
+            self.mutex.acquire()
             action = self.action_list[self.current_action_idx]
-            action.exec()
             self.current_action_idx += 1
-            if(action.to_be_waited):
-                break
-
-    def add_path(self, path, max_delay=15):
+            self.mutex.release()
+            action.exec()
+            
+    def add_path(self, robot, path, max_delay=15):
         """
-        defines a list of moveTo to follow a list of points [(x0, y0), (x1, y1), ...]
-        These actions are added to the sequence which is currently being defined
-        It's not yet executed!
+        Defines a list of MoveToAction to follow a list of points [(x0, y0), (x1, y1), ...]
+        These actions are added to the sequence.
         Don't forget that the orientation at the end of the path is not specified!
         """
         for x, y in path:
-            self.add_parallel(self.moveTo, [x, y, -1])
-            self.wait(max_delay=max_delay)
+            self.add_action(MoveToAction(robot, x, y))
 
 class Function(Action):
     '''
@@ -119,7 +175,10 @@ class Function(Action):
         else:
             self.function = lambda: function(*args)
 
-    def exec(self):
+    def __str__(self):
+        return "Funtion call"
+
+    def private_exec(self):
         if(not self.callback is None):
             self.function(self.private_callback)
         else:
@@ -146,3 +205,16 @@ class MoveToAction(Function):
                  y : int, \
                  angle : int = -1):
         Function.__init__(self, robot.moveTo, [x, y, angle])
+
+class AX12MoveAction(Function):
+    '''
+    Move action of an AX12
+    '''
+    def __init__(self, \
+                 ax12 : AX12, \
+                 position : int,
+                 cancel_position : int = None):
+        Function.__init__(self, ax12.move, [position])
+        self.ax12 = ax12
+        self.cancel_position = cancel_position
+
