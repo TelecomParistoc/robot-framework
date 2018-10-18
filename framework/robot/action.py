@@ -49,15 +49,11 @@ class Action:
         self.private_exec()
         if(self.to_be_waited):
             self.done_condvar.acquire()
-            t0 = time.time()
-            t1 = t0
-            while not self.done:
-                self.done_condvar.wait(self.timeout - (t1 - t0))
-                t1 = time.time()
-                if ((t1 - t0) >= self.timeout) and not self.done:
+            if not self.done:
+                self.done_condvar.wait(self.timeout)
+                if not self.done:
                     print(self, "timed out.")
                     self.cancel_exec()
-                    break
             self.done_condvar.release()
 
     def cancel_exec(self):
@@ -218,3 +214,9 @@ class AX12MoveAction(Function):
         self.ax12 = ax12
         self.cancel_position = cancel_position
 
+    def cancel_exec(self):
+        if self.cancel_position is None:
+            self.ax12.turn(0)
+        else:
+            self.ax12.move(self.cancel_position)
+        Action.cancel_exec(self)
