@@ -79,6 +79,8 @@ def sensor_manager(robot, front_detection, rear_detection):
 
     must_resume = False
 
+    print("[i] collision detection started.")
+
     while robot.enable_collision_detection:
 
         forward_obstacle, backward_obstacle = is_collision(robot,
