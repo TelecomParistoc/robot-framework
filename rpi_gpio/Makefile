@@ -4,7 +4,7 @@ PREFIX = /usr/local/lib/
 
 PYTHON_EXE = gpio_test.py
 PYTHON_BINDING = python_binding.py
-PYTHON_PREFIX = /usr/local/lib/python3.4/dist-packages/
+PYTHON_PREFIX = /usr/local/lib/python3.5/dist-packages/
 LOCAL_PYTHON = gpio.py
 
 CC = g++

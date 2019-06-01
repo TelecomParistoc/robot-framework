@@ -1,6 +1,6 @@
 GENERIC_ROBOT_PREFIX = framework/robot/
 BIG_ROBOT = framework/local_robot/big_robot.py
-PYTHON_PREFIX = /usr/local/lib/python3.4/dist-packages/
+PYTHON_PREFIX = /usr/local/lib/python3.5/dist-packages/
 
 
 
