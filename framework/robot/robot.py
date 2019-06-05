@@ -84,7 +84,7 @@ class Robot:
             It must be called by __init__
         """
         if not self.moving_interface:
-            print "[-] Error: moving_interface is set to False; No functions are loaded"
+            print("[-] Error: moving_interface is set to False; No functions are loaded")
             return
 
         for module in [motion, motordriver]:
@@ -118,7 +118,6 @@ class Robot:
                     self.final_heading_stack.pop(), self.moveTo_callback_stack.pop())
 
     def turn(self, heading, callback=lambda: None):
-
         self.turning = True
         self.turn_callback.append(callback)
         motion.turn(heading, callback=self.private_turn_callback)
@@ -140,7 +139,7 @@ class Robot:
                 erase=True):
         """
             this function does the same thing as motion.moveTo, but saves the
-            command sent to MotorController. It's usefull to resume the command
+            command sent to MotorController. It's useful to resume the command
             after an emergency stop
 
             If erase is set to True, all previous orders are forgotten
@@ -148,7 +147,7 @@ class Robot:
             will be executed afterwards
         """
         if not self.moving_interface:
-            print "[-] Error in Robot.moveTo; moving_interface is not enable"
+            print("[-] Error in Robot.moveTo; moving_interface is not enabled")
             return
 
         if self.obstacle_stop:
@@ -159,7 +158,7 @@ class Robot:
             return
 
         if self.debug:
-            print "[moveTo Python] from ", self.get_pos_X(), self.get_pos_Y(), "to", x_dest, y_dest, " ; time = ", time.time() - self.t_0
+            print("[moveTo Python] from ", self.get_pos_X(), self.get_pos_Y(), "to", x_dest, y_dest, " ; time = ", time.time() - self.t_0)
 
         if erase:
             self.erase_moveTo_stack()
@@ -181,7 +180,7 @@ class Robot:
             tmp = self.moveTo_callback_stack.pop()
             if callable(tmp): tmp()
 
-	self.turning = False
+	    self.turning = False
         #if stacks are not empty
         if self.x_dest_stack:
             time.sleep(.3)
@@ -220,7 +219,7 @@ class Robot:
     def load_add_path(self, filename, max_delay=15):
 
         if self.debug:
-            print "[+] adding path: " + filename
+            print([+] adding path: ", filename)
         path = json_to_python(filename, self.color)
         self.add_path_to_follow(path, max_delay=max_delay)
 
@@ -248,7 +247,7 @@ class Robot:
 
     def stop_collision_sensors(self):
         self.enable_collision_detection = False
-        print "[+] Stopping collision detection"
+        print("[+] Stopping collision detection")
 
 
     def add_method(self, func, name=None):
@@ -421,7 +420,7 @@ class Robot:
                 self.temp_expected_callbacks[-1] = n_callbacks
             self.temp_expected_callbacks.append(0)
             if self.debug:
-                print("[++] New step added to current sequence "+self.cur_sequence_constructed+", with a delay of "+str(max_delay))
+                print("[++] New step added to current sequence ", self.cur_sequence_constructed, ", with a delay of "+str(max_delay))
 
         else:
             if len(self.sequences[""][-1]) == 0:
@@ -728,13 +727,13 @@ class Robot:
                                 self.reset_waited_callbacks_release_acquire_launch_sequence()
 
                                 if self.debug:
-                                    print("[+++] Parallel block "+str(prev_parallel)+" done, all actions of sequence "+prev+" has been done, we return to "+seq+" sequence")
+                                    print("[+++] Parallel block ", prev_parallel, " done, all actions of sequence ", prev, " has been done, we return to ", seq, " sequence")
                             else:
                                 prev_time = self.custom_timer()
                                 self.reset_waited_callbacks_release_acquire_launch_sequence(self.cur_parallel)
                                 if self.debug:
                                     if self.cur_sequence != "":
-                                        print "[+] Parallel block "+str(self.cur_parallel)+" done in sequence "+self.cur_sequence+"; continuing (time stamp =", time.time() - self.t_0, ")"
+                                        print("[+] Parallel block ", self.cur_parallel, " done in sequence ", self.cur_sequence, "; continuing (time stamp =", time.time() - self.t_0, ")")
 
                 self.sequence_mutex.release()
 
@@ -749,7 +748,7 @@ class Robot:
             self.emergency_stop()
         if self.debug:
             print("[++][...] Stopping sequence thread")
-	
+
 	if callable(self.to_call_at_stop):
 	    self.to_call_at_stop()
         time.sleep(.2) #make sure previous orders have been sent
