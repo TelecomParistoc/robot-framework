@@ -23,6 +23,8 @@ class Action:
             self.callback()
         if(not self.parent_sequence is None):
             self.parent_sequence.element_callback(self)
+        else if(self.to_be_waited):
+            waiting_for_callback = False
 
     def wait(self) -> 'Action':
         '''
@@ -34,6 +36,16 @@ class Action:
         else:
             self.to_be_waited = True
         return self
+
+    def exec(self):
+        '''
+        Has to be called in the end of all overriden exec in order to prevent the
+        program from being killed if the callback has to be waited for.
+        '''
+        if(self.to_be_waited && self.parent_sequence == None):
+            self.waiting_for_callback = True
+            while(waiting_for_callback):
+                pass
 
 
 class Sequence(Action):
@@ -64,8 +76,10 @@ class Sequence(Action):
     def element_callback(self, action):
         print("Callback received in sequence", self.name)
         self.nb_callbacks -= 1
+        # If the action was being waited for, the execution has to be resumed
         if(action.to_be_waited):
             self.exec()
+        # If all expected callbacks have been received, call the sequence callback
         if(self.nb_callbacks == 0):
             self.private_callback()
 
