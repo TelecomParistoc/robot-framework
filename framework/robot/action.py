@@ -64,7 +64,7 @@ class Sequence(Action):
     '''
     A sequence is a collection of actions
     '''
-    def __init__(self, name = None, callback : callable = lambda : None):
+    def __init__(self, name = None, callback : callable = lambda : None, abort_if_fail : bool = False):
         Action.__init__(self, callback)
         self.action_list = []
         self.current_action_idx = 0
@@ -111,11 +111,11 @@ class Sequence(Action):
         print("Callback received in sequence", self.name, ",", \
                 self.nb_callbacks, "expected callbacks left")
         # If all expected callbacks have been received, call the sequence callback
-        if(self.nb_callbacks == 0):
-            self.mutex.release()
+        no_callbacks_left = self.nb_callbacks == 0
+        self.mutex.release()
+        if no_callbacks_left:
             self.private_callback()
-        else:
-            self.mutex.release()
+
 
     def element_cancel(self):
         '''
@@ -127,11 +127,13 @@ class Sequence(Action):
         print("Element execution canceled in sequence", self.name, ",", \
                 self.nb_callbacks, "expected callbacks left")
         # If all expected callbacks have been received, call the sequence callback
-        if(self.nb_callbacks == 0):
-            self.mutex.release()
+        no_callbacks_left = self.nb_callbacks == 0
+        self.mutex.release()
+        if no_callbacks_left:
             self.private_callback()
-        else:
-            self.mutex.release()
+        elif abort_if_fail:
+            self.cancel_exec()
+            
 
     def private_exec(self):
         '''
@@ -147,15 +149,30 @@ class Sequence(Action):
             self.current_action_idx += 1
             self.mutex.release()
             action.exec()
-            
-    def add_path(self, robot, path, max_delay=15):
+
+    def add_path(self, robot, path = [], movement_timeout : int = None, filename = None):
         """
         Defines a list of MoveToAction to follow a list of points [(x0, y0), (x1, y1), ...]
+        The path is either passed as a list of points or as a json file if filename is specified.
         These actions are added to the sequence.
-        Don't forget that the orientation at the end of the path is not specified!
+        The orientation at the end of each position is not specified.
         """
+
+        def json_to_python(filename, color):
+            """
+            loads a .json and returns a list [(x0, y0), (x1, y1), ...]
+            make sure color is "green" or "orange"
+            """
+            with open(filename, "r") as f:
+                result = json.loads(f.read())
+
+            return  [(p['x'], p['y']) for p in result[color][0]['points']]
+
+        if(not filename is None):
+            path = json_to_python(filename, robot.color)
+
         for x, y in path:
-            self.add_action(MoveToAction(robot, x, y))
+            self.add_action(MoveToAction(robot, x, y).wait(movement_timeout))
 
 class Function(Action):
     '''
@@ -201,6 +218,7 @@ class MoveToAction(Function):
                  y : int, \
                  angle : int = -1):
         Function.__init__(self, robot.moveTo, [x, y, angle])
+
 
 class AX12MoveAction(Function):
     '''

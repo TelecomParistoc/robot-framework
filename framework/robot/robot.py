@@ -14,7 +14,8 @@ import collision_detection
 
 class Position:
     """
-    Represents a position of the robot on the table. 
+    Represents a position of the robot on the table.
+    It is used to store the moveTo calls that have to be made.
     Distances are in mm.
     The heading angle is in degrees and is 0 on the x axis.
     Callback is a function called when the position is reached.
@@ -24,6 +25,17 @@ class Position:
         self.x = x
         self.y = y
         self.heading = heading
+        self.callback = callback
+
+class Distance:
+    """
+    Represents a distance the robot has to move.
+    It is used to store the move calls that have to be made.
+    Distances are in mm.
+    Callback is a function called when the distance has been traveled.
+    """
+    def __init__(self, dist : int = 0, callback : callable = lambda: None):
+        self.dist = dist
         self.callback = callback
 
 class Robot:
@@ -58,7 +70,6 @@ class Robot:
 
             #variables for move
             self.goal_dist = []
-            self.move_callback = []
             self.load_moving_interface()
 
             self.turning = False
@@ -98,7 +109,7 @@ class Robot:
 
     def stop_motion(self):
         self.obstacle_stop = True
-        motion.move(1)
+        self.move(1, erase = False)
 
     def resume_motion(self):
         self.obstacle_stop = False
@@ -170,17 +181,14 @@ class Robot:
         same thing as moveTo
         """
         if erase:
-            self.goal_dist.append(goal_dist)
-            self.move_callback.append(callback)
-        else:
-            self.goal_dist.append(goal_dist)
-            self.move_callback.append(callback)
+            self.goal_dist = []
+
+        self.goal_dist.append(Distance(goal_dist, callback))
         motion.move(goal_dist, self.private_move_callback)
 
     def private_move_callback(self):
-        self.goal_dist.pop()
-        tmp = self.move_callback.pop()
-        if callable(tmp): tmp()
+        tmp = self.goal_dist.pop()
+        if callable(tmp.callback: tmp.callback()
 
 
     def load_add_path(self, filename, max_delay=15):
@@ -286,21 +294,4 @@ class Robot:
     def is_running(self):
         return self.started
 
-######### Paths ########
 
-def json_to_python(filename, color):
-    """
-    loads a .json and returns a list [(x0, y0), (x1, y1), ...]
-    make sure color is "green" or "orange"
-    """
-    with open(filename, "r") as f:
-        result = json.loads(f.read())
-
-    return  [(p['x'], p['y']) for p in result[color][0]['points']]
-
-
-def load_all_path(color):
-    assert color == "green" or color == "orange"
-
-    for file in listdir(PATHS_FOLDER):
-        exec("global " + file + " = json_to_python(file, color)")
