@@ -3,7 +3,6 @@ import types
 import time
 import math
 
-
 import json
 from os import listdir
 import os
@@ -13,10 +12,24 @@ import motion
 import motordriver
 import collision_detection
 
+class Position:
+    """
+    Represents a position of the robot on the table. 
+    Distances are in mm.
+    The heading angle is in degrees and is 0 on the x axis.
+    Callback is a function called when the position is reached.
+    """
+    def __init__(self, x : int = 0, y : int = 0, heading : int = 0, 
+            callback : callable = lambda: None):
+        self.x = x
+        self.y = y
+        self.heading = heading
+        self.callback = callback
+
 class Robot:
     """
-    represents a robot on which we can add objects (like AX12 motors for example)
-    or specify sequences of actions
+    Represents a robot on which we can add objects (like AX12 motors for example).
+    To program actions on this robot, see action.py
     """
 
     def __init__(self, debug=True, moving_interface=True):
@@ -33,8 +46,6 @@ class Robot:
         self.current_callback_index = 0
 
         self.t_0 = time.time()
-        self.frozen_time = None
-        self.time_offset = 0
 
         self.to_call_at_stop = None
 
@@ -43,10 +54,7 @@ class Robot:
             self.actual_path = None
 
             #variables for moveTo
-            self.x_dest_stack = []
-            self.y_dest_stack = []
-            self.final_heading_stack = []
-            self.moveTo_callback_stack = []
+            self.dest_position_stack = []
 
             #variables for move
             self.goal_dist = []
@@ -54,7 +62,6 @@ class Robot:
             self.load_moving_interface()
 
             self.turning = False
-            self.turn_callback = []
 
             self.obstacle_stop = False
 
@@ -91,33 +98,28 @@ class Robot:
 
     def stop_motion(self):
         self.obstacle_stop = True
-        self.frozen_time = time.time()
         motion.move(1)
 
     def resume_motion(self):
         self.obstacle_stop = False
-        self.time_offset += time.time() - self.frozen_time
-        if self.x_dest_stack and self.y_dest_stack and self.final_heading_stack:
-            self.moveTo(self.x_dest_stack.pop(), self.y_dest_stack.pop(), \
-                    self.final_heading_stack.pop(), self.moveTo_callback_stack.pop())
+        if self.dest_position_stack:
+            next_position = self.dest_position_stack.pop()
+            self.moveTo(next_position.x, next_position.y, \
+                    next_position.heading, next_position.callback)
 
     def turn(self, heading, callback=lambda: None):
         self.turning = True
-        self.turn_callback.append(callback)
         motion.turn(heading, callback=self.private_turn_callback)
 
     def private_turn_callback(self):
         self.turning = False
-        self.turn_callback.pop()()
 
     def set_turning(self, value):
         #value must be True or False
         self.turning = value
 
     def erase_moveTo_stack(self):
-        self.x_dest_stack = []
-        self.y_dest_stack = []
-        self.final_heading_stack = []
+        self.dest_position_stack = []
 
     def moveTo(self, x_dest, y_dest, final_heading=-1, callback=None,
                 erase=True):
@@ -135,10 +137,8 @@ class Robot:
             return
 
         if self.obstacle_stop:
-            self.moveTo_callback_stack = [callback] + self.moveTo_callback_stack
-            self.x_dest_stack = [x_dest] + self.x_dest_stack
-            self.y_dest_stack = [y_dest] + self.y_dest_stack
-            self.final_heading_stack = [final_heading] + self.final_heading_stack
+            self.dest_position_stack = [Position(x_dest, y_dest, final_heading, callback)] \
+                                       + self.dest_position_stack
             return
 
         if self.debug:
@@ -147,29 +147,23 @@ class Robot:
         if erase:
             self.erase_moveTo_stack()
 
-        self.moveTo_callback_stack.append(callback)
-        self.x_dest_stack.append(x_dest)
-        self.y_dest_stack.append(y_dest)
-        self.final_heading_stack.append(final_heading)
+        self.dest_position_stack.append(Position(x_dest, y_dest, final_heading, callback))
         self.turning = True
         motion.set_after_first_turn_of_move_to_callback(lambda: self.set_turning(False))
         motion.set_after_translation_of_move_to_callback(lambda: self.set_turning(True))
         motion.moveTo(x_dest, y_dest, final_heading, self.private_moveTo_callback)
 
     def private_moveTo_callback(self):
-        if self.x_dest_stack:
-            self.x_dest_stack.pop()
-            self.y_dest_stack.pop()
-            self.final_heading_stack.pop()
-            tmp = self.moveTo_callback_stack.pop()
-            if callable(tmp): tmp()
+        if self.dest_position_stack:
+            tmp = self.dest_position_stack.pop()
+            if callable(tmp.callback): tmp.callback()
 
         self.turning = False
         #if stacks are not empty
-        if self.x_dest_stack:
+        if self.dest_position_stack:
             time.sleep(.3)
-            motion.moveTo(self.x_dest_stack[-1], self.y_dest_stack[-1],
-                        self.final_heading_stack[-1], self.private_moveTo_callback)
+            tmp = self.dest_position_stack[-1]
+            motion.moveTo(tmp.x, tmp.y, tmp.heading, self.private_moveTo_callback)
 
     def move(self, goal_dist, callback=None, erase=True):
         """
@@ -274,17 +268,6 @@ class Robot:
         self.paused = False
         if self.debug:
             print("[++] Unpausing thread")
-
-    def custom_timer(self):
-        """
-        if we are avoiding an obstacle, we want to shift all our actions in
-        time.
-        """
-
-        if not self.obstacle_stop:
-            return time.time() - self.time_offset
-        else:
-            return self.frozen_time
 
     def stop(self):
         self.started = False
