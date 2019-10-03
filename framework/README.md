@@ -75,6 +75,17 @@ action3.exec()
 ```
 `action1` and `action2` will are started in parallel however `action3` will only start when `action2` is over (`action2.exec()` ends).
 
+#### Function
+
+Function is an Action that executes a custom function `fun` given as an argument.
+```
+function = Function(fun)
+```
+The function `fun` has to be non-blocking, or else `function.exec()` can be blocking even if `function.wait()` has not been called at the definition. If fun takes a non-trivial amount of time to execute, you can instead use a `ThreadedFunction`:
+```
+function = ThreadedFunction(fun)
+```
+in this case, `fun` is executed on another thread. Beware of concurrency.
 
 #### Sequence
 
@@ -97,3 +108,10 @@ If the robot has to wait for all actions of the sequence to be over before doing
 sequence.wait()
 ```
 If this method is used, `sequence.exec()` will block until all callbacks are received.
+
+#### Other action_list
+
+Other useful actions are defined in [robot/action.py](robot/action.py):
+* MoveToAction
+* AX12MoveAction
+Please take a look at the file to learn more.
