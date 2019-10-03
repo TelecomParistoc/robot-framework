@@ -109,7 +109,7 @@ sequence.wait()
 ```
 If this method is used, `sequence.exec()` will block until all callbacks are received.
 
-#### Other action_list
+#### Other Actions
 
 Other useful actions are defined in [robot/action.py](robot/action.py):
 * MoveToAction
