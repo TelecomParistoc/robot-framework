@@ -114,4 +114,5 @@ If this method is used, `sequence.exec()` will block until all callbacks are rec
 Other useful actions are defined in [robot/action.py](robot/action.py):
 * MoveToAction
 * AX12MoveAction
+
 Please take a look at the file to learn more.
