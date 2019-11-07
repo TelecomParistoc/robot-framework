@@ -47,7 +47,7 @@ r.add_object(AX12(130), "motor_2")
 
 ### Define actions to be executed by the robot
 
-The file [robot/action.py](robot/action.py) defines multiple classes.
+The file [action/action.py](action/action.py) defines multiple classes.
 
 #### Abstract action
 
@@ -112,7 +112,7 @@ If this method is used, `sequence.exec()` will block until all callbacks are rec
 
 #### Other Actions
 
-Other useful actions are defined in [robot/action.py](robot/action.py):
+Other useful actions are defined in [action/action.py](action/action.py):
 * MoveToAction
 * AX12MoveAction
 
@@ -123,4 +123,4 @@ Please take a look at the file to learn more.
 If the execution of an action can be non-blocking, how do we know an action has ended? Thanks to callbacks. A callback is a function of type `callable` (`void -> void`). It is executed when an action is over.
 
 Some actions do not have a callback, their end cannot be monitored.
-Some actions allow you to define a custom callback, please refer to the file [robot/action.py](robot/action.py) for more information.
+Some actions allow you to define a custom callback, please refer to the file [action/action.py](action/action.py) for more information.
