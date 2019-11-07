@@ -47,7 +47,7 @@ r.add_object(AX12(130), "motor_2")
 
 ### Define actions to be executed by the robot
 
-The file `action.py` defines multiple classes.
+The file [robot/action.py](robot/action.py) defines multiple classes.
 
 #### Abstract action
 
@@ -56,8 +56,9 @@ The two most important ones to know are :
 
  * The action is started using `action.exec()`.
  * You can specify that the end of the action has to be waited for before executing the next action using `action.wait()`.
+ * You can use an optional timeout: `action.wait(timeout)` where `timeout` is a time in seconds. In this case, if the call of `action.exec()` lasts longer than `timeout`, the action is cancelled. The effect of cancelling an action can be defined in subclasses.
 
-`action.exec()` has to be non-blocking unless `action.wait()` has been set. In this case, it has to block the execution until the action is over.
+`action.exec()` has to be non-blocking unless `action.wait()` has been set. In this case, it has to block the execution until the action is over or the timeout is elapsed.
 This property makes parallel actions possible.
 
 ```
@@ -116,3 +117,10 @@ Other useful actions are defined in [robot/action.py](robot/action.py):
 * AX12MoveAction
 
 Please take a look at the file to learn more.
+
+#### Callbacks
+
+If the execution of an action can be non-blocking, how do we know an action has ended? Thanks to callbacks. A callback is a function of type `callable` (`void -> void`). It is executed when an action is over.
+
+Some actions do not have a callback, their end cannot be monitored.
+Some actions allow you to define a custom callback, please refer to the file [robot/action.py](robot/action.py) for more information.

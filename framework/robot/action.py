@@ -16,7 +16,7 @@ class Action:
         self.timeout = None
         self.parent_sequence = None
         self.done = False
-        # Conditional variable : an object that allows a thread to wait for an event 
+        # Conditional variable : an object that allows a thread to wait for an event
         # from another thread. Used to wait for actions to end.
         self.done_condvar = Condition()
 
@@ -44,7 +44,7 @@ class Action:
             self.to_be_waited = True
             self.timeout = timeout
         return self
-    
+
     def exec(self):
         self.private_exec()
         if(self.to_be_waited):
@@ -133,7 +133,7 @@ class Sequence(Action):
             self.private_callback()
         elif abort_if_fail:
             self.cancel_exec()
-            
+
 
     def private_exec(self):
         '''
