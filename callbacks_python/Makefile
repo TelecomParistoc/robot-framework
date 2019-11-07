@@ -21,6 +21,7 @@ test: $(TARGET)
 	python $(PYTHON_EXE)
 
 install:
+	mkdir -p $(LOCAL_PYTHON)
 	cp $(PYTHON_LIB) $(LOCAL_PYTHON)
 
 clean:

@@ -9,7 +9,7 @@ import time
 
 
 def common_callback(index, time):
-	print "Callback with index "+str(index)+" reached after a "+str(time)+" seconds delay"
+	print("Callback with index", index, "reached after a", time, "seconds delay")
 
 def timer_launch(time, index, lib):
 	return lib.call_after_delay(ctypes.c_float(time), encapsulate_callback(lambda: common_callback(index, time), True))
