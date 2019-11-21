@@ -208,6 +208,42 @@ class ThreadedFunction(Function):
         self.thread = Thread(target = function, args = args)
         Function.__init__(self, lambda : self.thread.start(), [], callback)
 
+class ConditionalAction(Action):
+    '''
+    A branching action that can trigger an action or another depending on the return value of a function
+    '''
+    def __init__(self, \
+                 condition,
+                 action_then : Action,
+                 action_else : Action,
+                 callback : callable = lambda : None):
+        '''
+        condition is a function that returns a boolean.
+        action_then is executed if condition() returns True when the ConditionalAction is executed, action_else is executed otherwise.
+        action_then or action_else may be Null.
+        '''
+        Action.__init__(self, callback)
+        self.condition = condition
+        # We have to make sure that the callback is called by the callback of the executed action
+        self.action_then = action_then
+        if not action_then is Null:
+            action_then.callback = lambda : action_then.callback(); self.private_callback()
+        self.action_else = action_else
+        if not action_else is Null:
+            action_else.callback = lambda : action_else.callback(); self.private_callback()
+
+    def private_exec(self):
+        if self.condition():
+            if not action_then is Null:
+                action_then.exec()
+            else:
+                private_callback()
+        else:
+            if not action_else is Null:
+                action_else.exec()
+            else: 
+                private_callback()
+
 class MoveToAction(Function):
     '''
     Action moving to position and angle
