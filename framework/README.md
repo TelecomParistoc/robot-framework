@@ -124,3 +124,16 @@ If the execution of an action can be non-blocking, how do we know an action has 
 
 Some actions do not have a callback, their end cannot be monitored.
 Some actions allow you to define a custom callback, please refer to the file [action/action.py](action/action.py) for more information.
+
+### Mission
+
+A mission is an object composed of:
+* a root action
+* a position
+* an estimated gain
+* an estimated time of execution
+* a maximal time of execution
+* a minimal and maximal date of execution
+
+Missions represent a set of actions the robot can perform to earn points.
+When a mission is finished or aborted, the next mission to execute is dynamically chosen.
