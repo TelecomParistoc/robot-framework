@@ -1,6 +1,6 @@
 from threading import Thread, Condition, Lock
 from AX12 import AX12
-import time
+import time, json
 debug = True
 
 class Action:
@@ -39,13 +39,14 @@ class Action:
         continuing execution
         '''
         if(self.callback is None):
-            raise(Error("Cannot wait an action without callback"))
+            raise(Exception("Cannot wait an action without callback"))
         else:
             self.to_be_waited = True
             self.timeout = timeout
         return self
 
     def exec(self):
+        #FIXME: private_exec ?
         self.private_exec()
         if(self.to_be_waited):
             self.done_condvar.acquire()
@@ -131,6 +132,7 @@ class Sequence(Action):
         self.mutex.release()
         if no_callbacks_left:
             self.private_callback()
+        #FIXME: abort_if_fail??
         elif abort_if_fail:
             self.cancel_exec()
 
@@ -195,6 +197,7 @@ class Function(Action):
         if(not self.callback is None):
             self.function(self.private_callback)
         else:
+            #FIXME : ?
             self.function()
 
 class ThreadedFunction(Function):
@@ -226,20 +229,21 @@ class ConditionalAction(Action):
         self.condition = condition
         # We have to make sure that the callback is called by the callback of the executed action
         self.action_then = action_then
-        if not action_then is Null:
+        if not action_then is None:
             action_then.callback = lambda : action_then.callback(); self.private_callback()
         self.action_else = action_else
-        if not action_else is Null:
+        if not action_else is None:
             action_else.callback = lambda : action_else.callback(); self.private_callback()
 
     def private_exec(self):
+        #FIXME: ?
         if self.condition():
-            if not action_then is Null:
+            if not action_then is None:
                 action_then.exec()
             else:
                 private_callback()
         else:
-            if not action_else is Null:
+            if not action_else is None:
                 action_else.exec()
             else: 
                 private_callback()

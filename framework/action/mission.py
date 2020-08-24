@@ -1,16 +1,10 @@
 from robot import Robot
 from action import Action
+from typing import Iterable
 
 class Mission:
-    def __init__(self, \
-                 root_action : Action, \
-                 position, 
-                 estimated_points : int, \
-                 estimated_time : int\
-                 timeout  : int\
-                 min_date : int
-                 max_date : int):
-        self.root_action = action
+    def __init__(self, root_action : Action, position, estimated_points : int, estimated_time : int, timeout : int, min_date : int, max_date):
+        self.root_action = root_action
         self.position = position
         self.estimated_points = estimated_points
         self.estimated_time = estimated_time
@@ -23,7 +17,8 @@ class MissionStrategy:
     This class is used to make a mission choice.
     It has to be overriden in order to define the eval function.
     '''
-    def __init__(self, mission_list, robot : Robot):
+
+    def __init__(self, mission_list : Iterable, robot : Robot):
         self.mission_list = mission_list
 
     def eval(self, mission) -> int:
@@ -34,15 +29,14 @@ class MissionStrategy:
         '''
         return 0
 
-    def best_mission() -> mission:
+    def best_mission(self) -> Mission:
         '''
         This function returns the mission with the highest evaluation.
         '''
-        if(len(mission_eval) == 0) return None
 
-        mission_eval = [mission, eval(mission) for mission in self.mission_list]
-        choice = mission_eval[0]
-        for(x in mission_eval[1:]):
-            if(x[1] > choice[1]):
-                choice = x
-        return x[0]
+        mission_eval = [ (mission, eval(mission)) for mission in self.mission_list]
+        if(len(mission_eval) == 0): return None
+
+        sorted_missions = sorted(mission_eval, key=lambda mission: mission[2], reverse=True)
+
+        return sorted_missions[0][0]
