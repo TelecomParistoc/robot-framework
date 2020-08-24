@@ -180,12 +180,9 @@ class Function(Action):
     '''
     A function call, with the options of callback
     '''
-    def __init__(self, \
-                 function, \
-                 args = [], \
-                 callback : callable = lambda : None):
+    def __init__(self, function, args = [], callback : callable = lambda : None):
         Action.__init__(self, callback)
-        if(not self.callback is None):
+        if(self.callback is not None):
             self.function = lambda cb: function(*(args + [cb]))
         else:
             self.function = lambda: function(*args)
@@ -194,20 +191,17 @@ class Function(Action):
         return "Funtion call"
 
     def private_exec(self):
-        if(not self.callback is None):
+        if(self.callback is not None):
             self.function(self.private_callback)
         else:
-            #FIXME : ?
+            #FIXME : linter error ?
             self.function()
 
 class ThreadedFunction(Function):
     '''
     A function call in a new thread
     '''
-    def __init__(self, \
-                 function, \
-                 args = [], \
-                 callback : callable = lambda : None):
+    def __init__(self, function, args = [], callback : callable = lambda : None):
         self.thread = Thread(target = function, args = args)
         Function.__init__(self, lambda : self.thread.start(), [], callback)
 
@@ -215,7 +209,7 @@ class ConditionalAction(Action):
     '''
     A branching action that can trigger an action or another depending on the return value of a function
     '''
-    def __init__(self, \
+    def __init__(self,
                  condition,
                  action_then : Action,
                  action_else : Action,
@@ -238,15 +232,17 @@ class ConditionalAction(Action):
     def private_exec(self):
         #FIXME: ?
         if self.condition():
-            if not action_then is None:
-                action_then.exec()
+            if self.action_then is not None:
+                self.action_then.exec()
             else:
                 private_callback()
         else:
-            if not action_else is None:
-                action_else.exec()
+            if not self.action_else is None:
+                self.action_else.exec()
             else: 
                 private_callback()
+
+####### EXAMPLES
 
 class MoveToAction(Function):
     '''
