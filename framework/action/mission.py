@@ -1,8 +1,9 @@
 from robot import Robot
-from action import Action
+from action import Action, Sequence
 from typing import Iterable
 
-class Mission:
+class Mission_old:
+    #TODO: cant we pass a sequence directly ?
     def __init__(self, root_action : Action, position, estimated_points : int, estimated_time : int, timeout : int, min_date : int, max_date):
         self.root_action = root_action
         self.position = position
@@ -11,6 +12,21 @@ class Mission:
         self.timeout = timeout
         self.min_date = min_date
         self.max_date = max_date
+
+class Mission:
+#TODO: cant we pass a sequence directly ?
+    def __init__(self, sequence : Sequence, position, estimated_points : int, estimated_time : int, timeout : int, min_date : int, max_date):
+        self.sequence = sequence
+        self.position = position
+        self.estimated_points = estimated_points
+        self.estimated_time = estimated_time
+        self.timeout = timeout
+        self.min_date = min_date
+        self.max_date = max_date
+
+    def exec(self):
+        self.sequence.exec()
+
 
 class MissionStrategy:
     '''
@@ -40,3 +56,6 @@ class MissionStrategy:
         sorted_missions = sorted(mission_eval, key=lambda mission: mission[2], reverse=True)
 
         return sorted_missions[0][0]
+
+    def execute_best_mission(self) -> None:
+        pass

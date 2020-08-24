@@ -46,8 +46,10 @@ class Action:
         return self
 
     def exec(self):
-        #FIXME: private_exec ?
+        # Private exec is the function that will be executed
         self.private_exec()
+
+        # Handle a blocking call ?
         if(self.to_be_waited):
             self.done_condvar.acquire()
             if not self.done:
@@ -56,6 +58,10 @@ class Action:
                     print(self, "timed out.")
                     self.cancel_exec()
             self.done_condvar.release()
+
+    def private_exec(self):
+        #to be overriden
+        return None
 
     def cancel_exec(self):
         if(not (self.callback is None or self.parent_sequence is None)):
@@ -210,7 +216,7 @@ class ConditionalAction(Action):
     A branching action that can trigger an action or another depending on the return value of a function
     '''
     def __init__(self,
-                 condition,
+                 condition : callable,
                  action_then : Action,
                  action_else : Action,
                  callback : callable = lambda : None):
