@@ -188,8 +188,8 @@ class Robot:
 
     def private_move_callback(self):
         tmp = self.goal_dist.pop()
-        if callable(tmp.callback: tmp.callback()
-
+        if callable(tmp.callback): 
+            tmp.callback()
 
     def load_add_path(self, filename, max_delay=15):
 

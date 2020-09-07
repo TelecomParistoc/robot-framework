@@ -14,7 +14,7 @@ class Mission_old:
         self.max_date = max_date
 
 class Mission:
-#TODO: cant we pass a sequence directly ?
+    #TODO: cant we pass a sequence directly ?
     def __init__(self, sequence : Sequence, position, estimated_points : int, estimated_time : int, timeout : int, min_date : int, max_date):
         self.sequence = sequence
         self.position = position

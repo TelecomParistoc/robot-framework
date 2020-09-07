@@ -7,6 +7,7 @@ import gpio
 import random
 import time
 
+#TODO: python2 to 3
 
 def print_ax12_id_on_the_fly(id):
     print "[+] I2C device with ID "+str(id)+" detected"
