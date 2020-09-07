@@ -49,6 +49,8 @@ r.add_object(AX12(130), "motor_2")
 
 The file [action/action.py](action/action.py) defines multiple classes.
 
+<img src="../doc/uml.png" width="700">
+
 #### Abstract action
 
 An Action is an object that has to meet several requirements.

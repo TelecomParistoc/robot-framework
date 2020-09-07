@@ -1,6 +1,8 @@
 from threading import Thread, Condition, Lock
 from AX12 import AX12
 import time, json
+from typing import Iterable
+
 debug = True
 
 class Action:
@@ -71,7 +73,7 @@ class Sequence(Action):
     '''
     A sequence is a collection of actions
     '''
-    def __init__(self, name = None, callback : callable = lambda : None, abort_if_fail : bool = False):
+    def __init__(self, name : str = None, callback : callable = lambda : None, abort_if_fail : bool = False):
         Action.__init__(self, callback)
         self.action_list = []
         self.current_action_idx = 0
@@ -248,7 +250,67 @@ class ConditionalAction(Action):
             else: 
                 private_callback()
 
+class Mission():
+    #TODO: docstring
+    #TODO: wip
+    def __init__(self, sequence : Sequence, position, estimated_points : int, estimated_time : int, timeout : int, min_date : int, max_date):
+        self.sequence = sequence
+        self.position = position
+        self.estimated_points = estimated_points
+        self.estimated_time = estimated_time
+        self.timeout = timeout
+        self.min_date = min_date
+        self.max_date = max_date
+
+    def exec(self):
+        self.sequence.exec()
+
+class TrueMission(Sequence):
+    #Idem
+    def __init__(self, position, estimated_points : int, estimated_time : int, timeout : int, min_date : int, max_date, name : str = None, callback : callable = lambda : None, abort_if_fail : bool = False):
+        Sequence.__init__(name, callback, abort_if_fail)
+        self.position = position
+        self.estimated_points = estimated_points
+        self.estimated_time = estimated_time
+        self.timeout = timeout
+        self.min_date = min_date
+        self.max_date = max_date
+
+class MissionStrategy:
+    '''
+    This class is used to make a mission choice.
+    It has to be overriden in order to define the eval function.
+    '''
+
+    def __init__(self, mission_list : Iterable, robot : Robot):
+        self.mission_list = mission_list
+
+    def eval(self, mission) -> int:
+        '''
+        This function returns an evaluation of the quality of a mission
+        at the current time.
+        You need to override it.
+        '''
+        return 0
+
+    def best_mission(self) -> Mission:
+        '''
+        This function returns the mission with the highest evaluation.
+        '''
+
+        mission_eval = [ (mission, eval(mission)) for mission in self.mission_list]
+        if(len(mission_eval) == 0): return None
+
+        sorted_missions = sorted(mission_eval, key=lambda mission: mission[2], reverse=True)
+
+        return sorted_missions[0][0]
+
+    def execute_best_mission(self) -> None:
+        pass
+
 ####### EXAMPLES
+
+#TODO: to move
 
 class MoveToAction(Function):
     '''
