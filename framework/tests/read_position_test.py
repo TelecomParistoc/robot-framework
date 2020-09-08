@@ -32,7 +32,7 @@ r.wait(max_delay=3, n_callbacks=1)
 #second block of actions; this block will be run AFTER the first one
 
 def read():
-	print r.motor_1.get_position()
+	print(r.motor_1.get_position())
 
 r.add_parallel(read, [], False)
 r.wait(max_delay=2)

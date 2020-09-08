@@ -10,6 +10,7 @@ import random
 import time
 
 #TODO AX12 id's have to be completed
+#TODO: python 2 to 3
 catapult_id = 0
 sorting_wheel_id = 0
 ball_catcher_id = 0

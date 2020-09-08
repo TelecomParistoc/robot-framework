@@ -311,6 +311,7 @@ class MissionStrategy:
 ####### EXAMPLES
 
 #TODO: to move
+#FIXME: actually not only examples, some tests depend on it
 
 class MoveToAction(Function):
     '''

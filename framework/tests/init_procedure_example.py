@@ -4,6 +4,7 @@ from ..local_robot.big_robot import *
 import gpio
 import time
 
+#TODO: python 2 to 3
 
 if __name__ == "__main__":
 
