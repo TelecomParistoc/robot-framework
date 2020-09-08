@@ -249,6 +249,7 @@ class Robot:
 
 
     def add_object(self, obj, name=None):
+        #If no name given, add the obj __name__
         if name == None:
             if '__name__' not in dir(obj):
                 print("[-] Unable to retrieve name from obj during object adding")

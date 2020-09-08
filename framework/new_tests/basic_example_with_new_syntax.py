@@ -13,7 +13,10 @@ r.add_object(AX12(121), "motor_2")
 
 
 # -------------------------   SEQUENCE DEFINITION ----------------------------#
-#TODO: cant find add_parallel ?
+#TODO: cant find add_parallel / add_sequence?
+
+#TODO: implement add_parallel
+#TODO: implement add_sequence
 
 #defines a sequence of actions
 #note that the sequence is only defined and not run (for the moment)
